@@ -352,7 +352,7 @@
                         td.innerHTML = `<div style="color: #adb5bd;">-</div>`;
                     } else {
                         let germ = toGermanNote(v.note);
-                        td.innerHTML = `<div>${germ} <span style="font-size:0.75rem; opacity:0.8;">(${v.note.replace('b','♭').replace('#','♯')})</span></div>` +
+                        td.innerHTML = `<div>${germ}</div>` +
                                        `<div style="font-size:0.7rem; margin-top:2px; font-weight:normal; opacity:0.9;">[${getRoleLabel(v.role)}]</div>`;
                     }
                     tr.appendChild(td);
@@ -403,7 +403,7 @@
                 card.className = `voice-card ${getRoleClass(actualRole)}`;
                 card.innerHTML = `
                     <div class="voice-part">${chordObj.name} 和音</div>
-                    <div class="voice-note">${germ} <span style="font-size:0.8rem;">(${actualNote.replace('b','♭').replace('#','♯')})</span></div>
+                    <div class="voice-note">${germ}</div>
                     <div style="font-size:0.75rem; margin-top:4px;">[${getRoleLabel(actualRole)}]</div>
                 `;
                 display.appendChild(card);
