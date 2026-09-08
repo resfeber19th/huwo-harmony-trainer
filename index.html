@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ハーモニー練習</title>
+    <title>ハーモニー練習 お助けサイト</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
@@ -11,16 +11,16 @@
 </head>
 <body>
 
-    <h1>ハーモニー練習</h1>
+    <h1>ハーモニー練習 お助けサイト</h1>
 
     <!-- ランダム実践トレーニング -->
     <div class="section">
         <div class="settings-box">
             <label><strong>【進行・調選択】</strong></label><br>
             <select id="randModeSelect" onchange="onRandSettingChange()" style="margin-top: 5px;">
-                <option value="dur">長調 カデンツ</option>
-                <option value="moll">短調 カデンツ</option>
-                <option value="parallel">スケール練習α</option>
+                <option value="dur">dur (長調 カデンツ)</option>
+                <option value="moll">moll (短調 カデンツ)</option>
+                <option value="parallel">スケール同時進行練習</option>
                 <option value="kanon">カノン進行 (長調)</option>
             </select>
             <select id="randKeySelect" onchange="onRandSettingChange()" style="margin-top: 5px;">
@@ -31,7 +31,7 @@
         <div class="random-box">
             <div id="randomCondition" style="font-weight: bold; color: #1c7ed6; font-size: 1.1rem; margin-bottom: 5px;">調名</div>
             <div class="voice-display" id="voiceDisplay">
-                <!-- JSで動的生成 -->
+                <!-- JSで動적生成 -->
             </div>
             <button class="main-btn" onclick="if(window.confirm('別のパターンを作成してもいいですか？')){generateRandomCadenceNotes();}" style="font-size: 1rem; padding: 10px 20px; width: 100%; max-width: 300px;">新規パターン作成</button>
         </div>
@@ -43,8 +43,9 @@
         <div style="margin-bottom: 10px;">
             <label style="font-size: 0.9rem;">進行・調: </label><br>
             <select id="visualModeSelect" onchange="updateVisualTable()" style="margin-top: 5px;">
-                <option value="dur">長調 カデンツ</option>
-                <option value="moll">短調 カデンツ</option>
+                <option value="dur">dur (長調 カデンツ)</option>
+                <option value="moll">moll (短調 カデンツ)</option>
+                <option value="parallel">スケール同時進行練習</option>
                 <option value="kanon">カノン進行 (長調)</option>
             </select>
             <select id="visualKeySelect" onchange="updateVisualTable()" style="margin-top: 5px;">
