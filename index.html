@@ -19,6 +19,11 @@
         th { background: #e7f1ff; color: #004085; }
         tr:nth-child(even) { background: #fafafa; }
 
+        /* スライド風ビジュアル表のスタイル（色は問わずシンプルに音名を表示） */
+        .slide-table { margin-top: 15px; }
+        .slide-table th { background: #f8f9fa; color: #333; border: 1px solid #ccc; font-size: 1rem; }
+        .slide-table td { border: 1px solid #ccc; font-size: 1.1rem; height: 40px; color: #333; background: #fff; }
+
         #tunerDisplay { font-size: 1.5rem; font-weight: bold; margin: 5px 0; color: #333; }
         #centsDisplay { font-size: 1.1rem; font-weight: bold; margin-top: 5px; }
         .flex-container { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
@@ -49,7 +54,37 @@
         </div>
     </div>
 
-    <!-- ② 設定＆一覧セクション -->
+    <!-- ② スライド風 カデンツ・ビジュアル表 -->
+    <div class="section">
+        <h2>カデンツ・ビジュアル確認</h2>
+        <div style="margin-bottom: 10px;">
+            <label>調の選択: </label>
+            <select id="visualModeSelect" onchange="updateVisualTable()">
+                <option value="dur">dur (長調)</option>
+                <option value="moll">moll (短調)</option>
+            </select>
+            <select id="visualKeySelect" onchange="updateVisualTable()">
+                <!-- JSで動的に生成 -->
+            </select>
+        </div>
+        <h3 id="visualKeyTitle" style="margin: 5px 0 10px 0; color: #004085;">調 : --</h3>
+        <div style="overflow-x: auto;">
+            <table class="slide-table" id="visualTable">
+                <thead>
+                    <tr>
+                        <th>I (主和音)</th>
+                        <th>IV (下属音)</th>
+                        <th>V (属音)</th>
+                        <th>I (解決)</th>
+                    </tr>
+                </thead>
+                <tbody id="visualTableBody"></tbody>
+            </table>
+        </div>
+        <button class="main-btn" onclick="playCurrentVisualCadence()" style="margin-top: 10px;">このカデンツを聴く</button>
+    </div>
+
+    <!-- ③ カデンツ一覧リストセクション -->
     <div class="section">
         <h2>カデンツ一覧（完全4度循環）</h2>
         <div>
@@ -77,7 +112,7 @@
         </div>
     </div>
 
-    <!-- ③ チューナー＆メトロノームセクション -->
+    <!-- ④ チューナー＆メトロノームセクション -->
     <div class="flex-container">
         <div class="section" style="flex: 1; min-width: 300px;">
             <h2>チューナー</h2>
@@ -157,6 +192,47 @@
             "D":  { name: "D-moll",  chords: [["F5","D5","A4","D4"], ["G5","D5","Bb4","G3"], ["A5","C#5","A4","A3"], ["F5","D5","A4","D4"]] },
             "G":  { name: "G-moll",  chords: [["Bb5","G5","D5","G3"], ["C6","G5","Eb5","C3"], ["D6","F#5","D5","D3"], ["Bb5","G5","D5","G3"]] }
         };
+
+        function initVisualKeySelect() {
+            const select = document.getElementById("visualKeySelect");
+            select.innerHTML = "";
+            cycleKeys.forEach(k => {
+                let opt = document.createElement("option");
+                opt.value = k;
+                opt.innerText = k;
+                if (k === "Bb") opt.selected = true;
+                select.appendChild(opt);
+            });
+        }
+
+        function updateVisualTable() {
+            const mode = document.getElementById("visualModeSelect").value;
+            const key = document.getElementById("visualKeySelect").value;
+            const dataset = (mode === "dur") ? dataDur : dataMoll;
+            const item = dataset[key];
+
+            document.getElementById("visualKeyTitle").innerText = `調 : ${item.name}`;
+
+            const tbody = document.getElementById("visualTableBody");
+            tbody.innerHTML = "";
+
+            for (let v = 0; v < 4; v++) {
+                let tr = document.createElement("tr");
+                for (let c = 0; c < 4; c++) {
+                    let td = document.createElement("td");
+                    let note = item.chords[c][v];
+                    td.innerText = note.replace("b", "♭").replace("#", "♯");
+                    tr.appendChild(td);
+                }
+                tbody.appendChild(tr);
+            }
+        }
+
+        function playCurrentVisualCadence() {
+            const mode = document.getElementById("visualModeSelect").value;
+            const key = document.getElementById("visualKeySelect").value;
+            playCadenceSequence(key, mode);
+        }
 
         let currentRandomTask = null;
 
@@ -379,6 +455,8 @@
             return { name: noteName + octave, cents: cents };
         }
 
+        initVisualKeySelect();
+        updateVisualTable();
         updateTable();
     </script>
 </body>
