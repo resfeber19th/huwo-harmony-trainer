@@ -57,9 +57,6 @@
             <select id="randModeSelect" onchange="onRandSettingChange()">
                 <option value="dur">dur (長調 カデンツ)</option>
                 <option value="moll">moll (短調 カデンツ)</option>
-                <!-- ▼ ここに「dur moll」と「カノンの間」として追加 -->
-                <option value="parallel">スケール同時進行練習</option>
-                <!-- ▲ -->
                 <option value="kanon">カノン進行 (長調)</option>
             </select>
             <select id="randKeySelect" onchange="onRandSettingChange()" style="margin-top: 5px;">
@@ -446,22 +443,6 @@
                 { name: "IV", voices: [{role:"root", note:"C3"}, {role:"third", note:"E3"}, {role:"fifth", note:"G3"}, {role:"empty", note:""}] },
                 { name: "V", voices: [{role:"root", note:"D3"}, {role:"third", note:"F#3"}, {role:"fifth", note:"A3"}, {role:"empty", note:""}] }
             ]}
-        };
-
-        // 12調すべてのドイツ音名スケール定義（ここに挿入）
-        const scalesGerman = {
-            "C":  { name: "C-dur",  scale: ["C", "D", "E", "F", "G", "A", "H"] },
-            "F":  { name: "F-dur",  scale: ["F", "G", "A", "B", "C", "D", "E"] },
-            "Bb": { name: "B-dur",  scale: ["B", "C", "D", "Es", "F", "G", "A"] },
-            "Eb": { name: "Es-dur", scale: ["Es", "F", "G", "As", "B", "C", "D"] },
-            "Ab": { name: "As-dur", scale: ["As", "B", "C", "Des", "Es", "F", "G"] },
-            "Db": { name: "Des-dur", scale: ["Des", "Es", "F", "Ges", "As", "B", "C"] },
-            "Gb": { name: "Ges-dur", scale: ["Ges", "As", "B", "Ces", "Des", "Es", "F"] },
-            "B":  { name: "H-dur",  scale: ["H", "Cis", "Dis", "E", "Fis", "Gis", "Ais"] },
-            "E":  { name: "E-dur",  scale: ["E", "Fis", "Gis", "A", "H", "Cis", "Dis"] },
-            "A":  { name: "A-dur",  scale: ["A", "H", "Cis", "D", "E", "Fis", "Gis"] },
-            "D":  { name: "D-dur",  scale: ["D", "E", "Fis", "G", "A", "H", "Cis"] },
-            "G":  { name: "G-dur",  scale: ["G", "A", "H", "C", "D", "E", "Fis"] }
         };
         
         function getDataset(mode) {
