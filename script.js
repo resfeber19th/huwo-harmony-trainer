@@ -38,14 +38,6 @@ function getRoleClass(role) {
     return '';
 }
 
-function getRoleLabel(role) {
-    if (role === 'root') return '根音';
-    if (role === 'third') return '3音';
-    if (role === 'fifth') return '5音';
-    if (role === 'seventh') return '7音';
-    return '';
-}
-
 function getCentsText(role, mode, chordName) {
     if (role === 'root') return '±0¢';
     if (role === 'third') {
@@ -389,21 +381,67 @@ function initKeySelects() {
 function updateVisualTable() {
     const mode = document.getElementById("visualModeSelect").value;
     const key = document.getElementById("visualKeySelect").value;
+    
+    const theadRow = document.getElementById("visualTableHeadRow");
+    const tbody = document.getElementById("visualTableBody");
+    tbody.innerHTML = "";
+
+    if (mode === "parallel") {
+        const scaleData = scalesGerman[key] || scalesGerman["C"];
+        const length = 8;
+        const offsets = [0, 2, 4];
+
+        let voices = offsets.map(offset => {
+            let voiceNotes = [];
+            for (let i = 0; i < length; i++) {
+                let idx = (offset + i) % scaleData.scale.length;
+                voiceNotes.push(scaleData.scale[idx]);
+            }
+            return voiceNotes;
+        });
+
+        document.getElementById("visualKeyTitle").innerText = `調 : ${scaleData.name} (同時進行)`;
+
+        theadRow.innerHTML = `<th class="role-label">声部</th>`;
+        for (let i = 0; i < length; i++) {
+            let th = document.createElement("th");
+            th.innerText = `${i + 1}音目`;
+            theadRow.appendChild(th);
+        }
+
+        const partNames = ["5度パート", "3度パート", "根音パート"];
+        const roleClasses = ["role-fifth", "role-third", "role-root"];
+
+        for (let i = 2; i >= 0; i--) {
+            let tr = document.createElement("tr");
+
+            let tdLabel = document.createElement("td");
+            tdLabel.className = "role-label";
+            tdLabel.innerText = partNames[i];
+            tr.appendChild(tdLabel);
+
+            for (let j = 0; j < length; j++) {
+                let td = document.createElement("td");
+                td.className = roleClasses[i];
+                td.innerHTML = `<div>${voices[i][j]}</div>`;
+                tr.appendChild(td);
+            }
+            tbody.appendChild(tr);
+        }
+        return;
+    }
+
     const dataset = getDataset(mode);
     const item = dataset[key];
 
     document.getElementById("visualKeyTitle").innerText = `調 : ${item.name}`;
 
-    const theadRow = document.getElementById("visualTableHeadRow");
     theadRow.innerHTML = `<th class="role-label">声部</th>`;
     item.chords.forEach((chord, index) => {
         let th = document.createElement("th");
         th.innerText = `${index + 1}. ${chord.name}`;
         theadRow.appendChild(th);
     });
-
-    const tbody = document.getElementById("visualTableBody");
-    tbody.innerHTML = "";
 
     const partNames = ["7音", "5音", "3音", "根音"];
 
@@ -425,8 +463,8 @@ function updateVisualTable() {
             } else {
                 let germ = toGermanNote(v.note);
                 let cents = getCentsText(v.role, mode, chord.name);
-                td.innerHTML = `<div>${germ} <span style="font-size:0.7rem; font-weight:normal;">[${cents}]</span></div>` +
-                               `<div style="font-size:0.65rem; margin-top:2px; font-weight:normal; opacity:0.9;">[${getRoleLabel(v.role)}]</div>`;
+                // カデンツ表の各セルから「[根音]」などのロール文字表記を削除
+                td.innerHTML = `<div>${germ} <span style="font-size:0.7rem; font-weight:normal;">[${cents}]</span></div>`;
             }
             tr.appendChild(td);
         });
@@ -437,35 +475,24 @@ function updateVisualTable() {
 
 function generateParallelPattern(selectedKey) {
     const scaleData = scalesGerman[selectedKey] || scalesGerman["C"];
-    const scale = scaleData.scale;
-    const length = 8;
-    const offsets = [0, 2, 4]; 
-
-    let voices = offsets.map(offset => {
-        let voiceNotes = [];
-        for (let i = 0; i < length; i++) {
-            let idx = (offset + i) % scale.length;
-            voiceNotes.push(scale[idx]);
-        }
-        return voiceNotes;
-    });
-
-    document.getElementById("randomCondition").innerText = `[${scaleData.name}] スケール同時進行練習`;
     
-    const display = document.getElementById("voiceDisplay");
-    display.innerHTML = `
-        <div style="width: 100%; text-align: left; font-size: 0.95rem; line-height: 1.6; padding: 5px;">
-            <p style="margin: 3px 0;"><strong>根音パート:</strong> ${voices[0].join(" - ")}</p>
-            <p style="margin: 3px 0;"><strong>3度パート:</strong> ${voices[1].join(" - ")}</p>
-            <p style="margin: 3px 0;"><strong>5度パート:</strong> ${voices[2].join(" - ")}</p>
-        </div>
-    `;
+    // スケール同時進行時は上のカード部分には何も表示せず調名のみ、下の表に一覧を表示
+    document.getElementById("randomCondition").innerText = `[${scaleData.name}] スケール同時進行練習`;
+    document.getElementById("voiceDisplay").innerHTML = ""; 
+
+    document.getElementById("visualModeSelect").value = "parallel";
+    document.getElementById("visualKeySelect").value = selectedKey;
+    updateVisualTable();
 }
 
 function generateRandomCadenceNotes() {
     const mode = document.getElementById("randModeSelect").value;
     const selectedKey = document.getElementById("randKeySelect").value;
     const display = document.getElementById("voiceDisplay");
+
+    document.getElementById("visualModeSelect").value = mode;
+    document.getElementById("visualKeySelect").value = selectedKey;
+    updateVisualTable();
 
     if (mode === "parallel") {
         generateParallelPattern(selectedKey);
@@ -474,10 +501,6 @@ function generateRandomCadenceNotes() {
 
     const dataset = getDataset(mode);
     const item = dataset[selectedKey];
-
-    document.getElementById("visualModeSelect").value = mode;
-    document.getElementById("visualKeySelect").value = selectedKey;
-    updateVisualTable();
 
     document.getElementById("randomCondition").innerText = item.name;
     display.innerHTML = "";
@@ -518,7 +541,6 @@ function generateRandomCadenceNotes() {
         card.innerHTML = `
             <div class="voice-part">${idx + 1}. ${chordObj.name}</div>
             <div class="voice-note">${germ} <span style="font-size:0.7rem; font-weight:normal;">[${cents}]</span></div>
-            <div style="font-size:0.7rem; margin-top:4px;">[${getRoleLabel(actualRole)}]</div>
         `;
         display.appendChild(card);
     });
