@@ -12,24 +12,11 @@ select, button { font-size: 1rem; padding: 6px 10px; margin: 5px; font-family: '
 .matrix-table .role-label { background: #f1f3f5; font-weight: bold; width: 100px; font-size: 0.85rem; text-align: left; padding-left: 10px; position: sticky; left: 0; z-index: 2; border-right: 2px solid #bbb; }
 .matrix-table thead th:first-child { position: sticky; left: 0; z-index: 3; }
 
-/* ==========================================================
-   カラーユニバーサルデザイン（CUD）対応の配色定義
-   （色覚多様性を持つ方にも見分けやすい明度・色相の調整）
-   ========================================================== */
-
-/* 根音：視認性の高い「赤・朱色系」だが、明度を調整し、さらに下線や太字で補強 */
+/* カラーユニバーサルデザイン（CUD）対応の配色定義 */
 .role-root { background-color: #ffd8d8; color: #9c0000; font-weight: bold; border-bottom: 3px solid #e03131; }
-
-/* 3音：青系（CUD推奨の鮮やかなシアン・ブルー寄りに調整） */
 .role-third { background-color: #d0ebff; color: #1864ab; font-weight: bold; border-bottom: 3px solid #1c7ed6; }
-
-/* 5音：紫系（赤紫〜青紫に寄せることで、緑や赤と混同しにくいように配慮） */
 .role-fifth { background-color: #e5dbff; color: #5f3dc4; font-weight: bold; border-bottom: 3px solid #7950f2; }
-
-/* 7音：オレンジ・黄系（明度差をしっかり持たせた暖色） */
 .role-seventh { background-color: #ffec99; color: #8f6b00; font-weight: bold; border-bottom: 3px solid #f59f00; }
-
-/* 空欄 */
 .role-empty { background-color: #f8f9fa; color: #adb5bd; font-style: italic; }
 
 .random-box { background: #e7f5ff; border: 2px solid #74c0fc; padding: 15px; border-radius: 8px; margin-top: 15px; box-sizing: border-box; }
