@@ -19,6 +19,7 @@
         .role-third { background-color: #e3fafc; color: #0b7285; font-weight: bold; }
         .role-fifth { background-color: #f3f0ff; color: #5f3dc4; font-weight: bold; }
         .role-seventh { background-color: #fff3bf; color: #f08c00; font-weight: bold; }
+        .role-empty { background-color: #f8f9fa; color: #adb5bd; font-style: italic; }
 
         .random-box { background: #e7f5ff; border: 2px solid #74c0fc; padding: 15px; border-radius: 8px; margin-top: 15px; }
         .voice-display { display: flex; justify-content: center; gap: 10px; margin: 15px 0; flex-wrap: wrap; }
@@ -59,7 +60,7 @@
         </div>
     </div>
 
-    <!-- カデンツ・マトリクス確認（下から 根・3・5・7順） -->
+    <!-- カデンツ・マトリクス確認（下から 根・3・5・7順、縦列逆順） -->
     <div class="section">
         <h2>コードトーン追跡ビジュアル表（ドイツ音名）</h2>
         <div style="margin-bottom: 10px;">
@@ -73,7 +74,7 @@
             </select>
         </div>
         <h3 id="visualKeyTitle" style="margin: 5px 0 10px 0; color: #004085;">調 : --</h3>
-        <p style="font-size: 0.85rem; color: #666; margin: 5px 0 10px 0;">※ 下から順に「第1声部（低音域）〜第4声部（高音域）」へ向かって、基本のコードトーン（根音・3音・5音・7音）を配置しています。</p>
+        <p style="font-size: 0.85rem; color: #666; margin: 5px 0 10px 0;">※ 上から順に「第4声部（高音域）〜第1声部（低音域）」へ配置しています（属7以外は第4声部空白）。</p>
         <div style="overflow-x: auto;">
             <table class="matrix-table" id="visualTable">
                 <thead>
@@ -127,6 +128,7 @@
             if (role === 'third') return 'role-third';
             if (role === 'fifth') return 'role-fifth';
             if (role === 'seventh') return 'role-seventh';
+            if (role === 'empty') return 'role-empty';
             return '';
         }
 
@@ -135,6 +137,7 @@
             if (role === 'third') return '3音';
             if (role === 'fifth') return '5音';
             if (role === 'seventh') return '7音';
+            if (role === 'empty') return '空白';
             return '';
         }
 
@@ -147,156 +150,155 @@
 
         const dataDur = {
             "C": { name: "C-dur", chords: [
-                { name: "I", voices: [{role:"root", note:"C3"}, {role:"third", note:"E3"}, {role:"fifth", note:"G3"}, {role:"root", note:"C4"}] },
-                { name: "IV", voices: [{role:"root", note:"F3"}, {role:"third", note:"A3"}, {role:"fifth", note:"C4"}, {role:"root", note:"F4"}] },
+                { name: "I", voices: [{role:"root", note:"C3"}, {role:"third", note:"E3"}, {role:"fifth", note:"G3"}, {role:"empty", note:""}] },
+                { name: "IV", voices: [{role:"root", note:"F3"}, {role:"third", note:"A3"}, {role:"fifth", note:"C4"}, {role:"empty", note:""}] },
                 { name: "V7", voices: [{role:"root", note:"G3"}, {role:"third", note:"B3"}, {role:"fifth", note:"D4"}, {role:"seventh", note:"F4"}] },
-                { name: "I", voices: [{role:"root", note:"C3"}, {role:"third", note:"E3"}, {role:"fifth", note:"G3"}, {role:"root", note:"C4"}] }
+                { name: "I", voices: [{role:"root", note:"C3"}, {role:"third", note:"E3"}, {role:"fifth", note:"G3"}, {role:"empty", note:""}] }
             ]},
             "F": { name: "F-dur", chords: [
-                { name: "I", voices: [{role:"root", note:"F3"}, {role:"third", note:"A3"}, {role:"fifth", note:"C4"}, {role:"root", note:"F4"}] },
-                { name: "IV", voices: [{role:"root", note:"Bb3"}, {role:"third", note:"D4"}, {role:"fifth", note:"F4"}, {role:"root", note:"Bb4"}] },
+                { name: "I", voices: [{role:"root", note:"F3"}, {role:"third", note:"A3"}, {role:"fifth", note:"C4"}, {role:"empty", note:""}] },
+                { name: "IV", voices: [{role:"root", note:"Bb3"}, {role:"third", note:"D4"}, {role:"fifth", note:"F4"}, {role:"empty", note:""}] },
                 { name: "V7", voices: [{role:"root", note:"C3"}, {role:"third", note:"E3"}, {role:"fifth", note:"G3"}, {role:"seventh", note:"Bb3"}] },
-                { name: "I", voices: [{role:"root", note:"F3"}, {role:"third", note:"A3"}, {role:"fifth", note:"C4"}, {role:"root", note:"F4"}] }
+                { name: "I", voices: [{role:"root", note:"F3"}, {role:"third", note:"A3"}, {role:"fifth", note:"C4"}, {role:"empty", note:""}] }
             ]},
             "Bb": { name: "B-dur", chords: [
-                { name: "I", voices: [{role:"root", note:"Bb2"}, {role:"third", note:"D3"}, {role:"fifth", note:"F3"}, {role:"root", note:"Bb3"}] },
-                { name: "IV", voices: [{role:"root", note:"Eb3"}, {role:"third", note:"G3"}, {role:"fifth", note:"Bb3"}, {role:"root", note:"Eb4"}] },
+                { name: "I", voices: [{role:"root", note:"Bb2"}, {role:"third", note:"D3"}, {role:"fifth", note:"F3"}, {role:"empty", note:""}] },
+                { name: "IV", voices: [{role:"root", note:"Eb3"}, {role:"third", note:"G3"}, {role:"fifth", note:"Bb3"}, {role:"empty", note:""}] },
                 { name: "V7", voices: [{role:"root", note:"F3"}, {role:"third", note:"A3"}, {role:"fifth", note:"C4"}, {role:"seventh", note:"Eb4"}] },
-                { name: "I", voices: [{role:"root", note:"Bb2"}, {role:"third", note:"D3"}, {role:"fifth", note:"F3"}, {role:"root", note:"Bb3"}] }
+                { name: "I", voices: [{role:"root", note:"Bb2"}, {role:"third", note:"D3"}, {role:"fifth", note:"F3"}, {role:"empty", note:""}] }
             ]},
             "Eb": { name: "Es-dur", chords: [
-                { name: "I", voices: [{role:"root", note:"Eb3"}, {role:"third", note:"G3"}, {role:"fifth", note:"Bb3"}, {role:"root", note:"Eb4"}] },
-                { name: "IV", voices: [{role:"root", note:"Ab3"}, {role:"third", note:"C4"}, {role:"fifth", note:"Eb4"}, {role:"root", note:"Ab4"}] },
+                { name: "I", voices: [{role:"root", note:"Eb3"}, {role:"third", note:"G3"}, {role:"fifth", note:"Bb3"}, {role:"empty", note:""}] },
+                { name: "IV", voices: [{role:"root", note:"Ab3"}, {role:"third", note:"C4"}, {role:"fifth", note:"Eb4"}, {role:"empty", note:""}] },
                 { name: "V7", voices: [{role:"root", note:"Bb2"}, {role:"third", note:"D3"}, {role:"fifth", note:"F3"}, {role:"seventh", note:"Ab3"}] },
-                { name: "I", voices: [{role:"root", note:"Eb3"}, {role:"third", note:"G3"}, {role:"fifth", note:"Bb3"}, {role:"root", note:"Eb4"}] }
+                { name: "I", voices: [{role:"root", note:"Eb3"}, {role:"third", note:"G3"}, {role:"fifth", note:"Bb3"}, {role:"empty", note:""}] }
             ]},
             "Ab": { name: "As-dur", chords: [
-                { name: "I", voices: [{role:"root", note:"Ab3"}, {role:"third", note:"C4"}, {role:"fifth", note:"Eb4"}, {role:"root", note:"Ab4"}] },
-                { name: "IV", voices: [{role:"root", note:"Db3"}, {role:"third", note:"F3"}, {role:"fifth", note:"Ab3"}, {role:"root", note:"Db4"}] },
+                { name: "I", voices: [{role:"root", note:"Ab3"}, {role:"third", note:"C4"}, {role:"fifth", note:"Eb4"}, {role:"empty", note:""}] },
+                { name: "IV", voices: [{role:"root", note:"Db3"}, {role:"third", note:"F3"}, {role:"fifth", note:"Ab3"}, {role:"empty", note:""}] },
                 { name: "V7", voices: [{role:"root", note:"Eb3"}, {role:"third", note:"G3"}, {role:"fifth", note:"Bb3"}, {role:"seventh", note:"Db4"}] },
-                { name: "I", voices: [{role:"root", note:"Ab3"}, {role:"third", note:"C4"}, {role:"fifth", note:"Eb4"}, {role:"root", note:"Ab4"}] }
+                { name: "I", voices: [{role:"root", note:"Ab3"}, {role:"third", note:"C4"}, {role:"fifth", note:"Eb4"}, {role:"empty", note:""}] }
             ]},
             "Db": { name: "Des-dur", chords: [
-                { name: "I", voices: [{role:"root", note:"Db3"}, {role:"third", note:"F3"}, {role:"fifth", note:"Ab3"}, {role:"root", note:"Db4"}] },
-                { name: "IV", voices: [{role:"root", note:"Gb3"}, {role:"third", note:"Bb3"}, {role:"fifth", note:"Db4"}, {role:"root", note:"Gb4"}] },
+                { name: "I", voices: [{role:"root", note:"Db3"}, {role:"third", note:"F3"}, {role:"fifth", note:"Ab3"}, {role:"empty", note:""}] },
+                { name: "IV", voices: [{role:"root", note:"Gb3"}, {role:"third", note:"Bb3"}, {role:"fifth", note:"Db4"}, {role:"empty", note:""}] },
                 { name: "V7", voices: [{role:"root", note:"Ab3"}, {role:"third", note:"C4"}, {role:"fifth", note:"Eb4"}, {role:"seventh", note:"Gb4"}] },
-                { name: "I", voices: [{role:"root", note:"Db3"}, {role:"third", note:"F3"}, {role:"fifth", note:"Ab3"}, {role:"root", note:"Db4"}] }
+                { name: "I", voices: [{role:"root", note:"Db3"}, {role:"third", note:"F3"}, {role:"fifth", note:"Ab3"}, {role:"empty", note:""}] }
             ]},
             "Gb": { name: "Ges-dur", chords: [
-                { name: "I", voices: [{role:"root", note:"Gb3"}, {role:"third", note:"Bb3"}, {role:"fifth", note:"Db4"}, {role:"root", note:"Gb4"}] },
-                { name: "IV", voices: [{role:"root", note:"Cb3"}, {role:"third", note:"Eb4"}, {role:"fifth", note:"Gb4"}, {role:"root", note:"Cb4"}] },
+                { name: "I", voices: [{role:"root", note:"Gb3"}, {role:"third", note:"Bb3"}, {role:"fifth", note:"Db4"}, {role:"empty", note:""}] },
+                { name: "IV", voices: [{role:"root", note:"Cb3"}, {role:"third", note:"Eb4"}, {role:"fifth", note:"Gb4"}, {role:"empty", note:""}] },
                 { name: "V7", voices: [{role:"root", note:"Db3"}, {role:"third", note:"F3"}, {role:"fifth", note:"Ab3"}, {role:"seventh", note:"Cb4"}] },
-                { name: "I", voices: [{role:"root", note:"Gb3"}, {role:"third", note:"Bb3"}, {role:"fifth", note:"Db4"}, {role:"root", note:"Gb4"}] }
+                { name: "I", voices: [{role:"root", note:"Gb3"}, {role:"third", note:"Bb3"}, {role:"fifth", note:"Db4"}, {role:"empty", note:""}] }
             ]},
             "B": { name: "H-dur", chords: [
-                { name: "I", voices: [{role:"root", note:"B2"}, {role:"third", note:"D#3"}, {role:"fifth", note:"F#3"}, {role:"root", note:"B3"}] },
-                { name: "IV", voices: [{role:"root", note:"E3"}, {role:"third", note:"G#3"}, {role:"fifth", note:"B3"}, {role:"root", note:"E4"}] },
+                { name: "I", voices: [{role:"root", note:"B2"}, {role:"third", note:"D#3"}, {role:"fifth", note:"F#3"}, {role:"empty", note:""}] },
+                { name: "IV", voices: [{role:"root", note:"E3"}, {role:"third", note:"G#3"}, {role:"fifth", note:"B3"}, {role:"empty", note:""}] },
                 { name: "V7", voices: [{role:"root", note:"F#3"}, {role:"third", note:"A#3"}, {role:"fifth", note:"C#4"}, {role:"seventh", note:"E4"}] },
-                { name: "I", voices: [{role:"root", note:"B2"}, {role:"third", note:"D#3"}, {role:"fifth", note:"F#3"}, {role:"root", note:"B3"}] }
+                { name: "I", voices: [{role:"root", note:"B2"}, {role:"third", note:"D#3"}, {role:"fifth", note:"F#3"}, {role:"empty", note:""}] }
             ]},
             "E": { name: "E-dur", chords: [
-                { name: "I", voices: [{role:"root", note:"E3"}, {role:"third", note:"G#3"}, {role:"fifth", note:"B3"}, {role:"root", note:"E4"}] },
-                { name: "IV", voices: [{role:"root", note:"A3"}, {role:"third", note:"C#4"}, {role:"fifth", note:"E4"}, {role:"root", note:"A4"}] },
+                { name: "I", voices: [{role:"root", note:"E3"}, {role:"third", note:"G#3"}, {role:"fifth", note:"B3"}, {role:"empty", note:""}] },
+                { name: "IV", voices: [{role:"root", note:"A3"}, {role:"third", note:"C#4"}, {role:"fifth", note:"E4"}, {role:"empty", note:""}] },
                 { name: "V7", voices: [{role:"root", note:"B2"}, {role:"third", note:"D#3"}, {role:"fifth", note:"F#3"}, {role:"seventh", note:"A3"}] },
-                { name: "I", voices: [{role:"root", note:"E3"}, {role:"third", note:"G#3"}, {role:"fifth", note:"B3"}, {role:"root", note:"E4"}] }
+                { name: "I", voices: [{role:"root", note:"E3"}, {role:"third", note:"G#3"}, {role:"fifth", note:"B3"}, {role:"empty", note:""}] }
             ]},
             "A": { name: "A-dur", chords: [
-                { name: "I", voices: [{role:"root", note:"A2"}, {role:"third", note:"C#3"}, {role:"fifth", note:"E3"}, {role:"root", note:"A3"}] },
-                { name: "IV", voices: [{role:"root", note:"D3"}, {role:"third", note:"F#3"}, {role:"fifth", note:"A3"}, {role:"root", note:"D4"}] },
+                { name: "I", voices: [{role:"root", note:"A2"}, {role:"third", note:"C#3"}, {role:"fifth", note:"E3"}, {role:"empty", note:""}] },
+                { name: "IV", voices: [{role:"root", note:"D3"}, {role:"third", note:"F#3"}, {role:"fifth", note:"A3"}, {role:"empty", note:""}] },
                 { name: "V7", voices: [{role:"root", note:"E3"}, {role:"third", note:"G#3"}, {role:"fifth", note:"B3"}, {role:"seventh", note:"D4"}] },
-                { name: "I", voices: [{role:"root", note:"A2"}, {role:"third", note:"C#3"}, {role:"fifth", note:"E3"}, {role:"root", note:"A3"}] }
+                { name: "I", voices: [{role:"root", note:"A2"}, {role:"third", note:"C#3"}, {role:"fifth", note:"E3"}, {role:"empty", note:""}] }
             ]},
             "D": { name: "D-dur", chords: [
-                { name: "I", voices: [{role:"root", note:"D3"}, {role:"third", note:"F#3"}, {role:"fifth", note:"A3"}, {role:"root", note:"D4"}] },
-                { name: "IV", voices: [{role:"root", note:"G3"}, {role:"third", note:"B3"}, {role:"fifth", note:"D4"}, {role:"root", note:"G4"}] },
+                { name: "I", voices: [{role:"root", note:"D3"}, {role:"third", note:"F#3"}, {role:"fifth", note:"A3"}, {role:"empty", note:""}] },
+                { name: "IV", voices: [{role:"root", note:"G3"}, {role:"third", note:"B3"}, {role:"fifth", note:"D4"}, {role:"empty", note:""}] },
                 { name: "V7", voices: [{role:"root", note:"A2"}, {role:"third", note:"C#3"}, {role:"fifth", note:"E3"}, {role:"seventh", note:"G3"}] },
-                { name: "I", voices: [{role:"root", note:"D3"}, {role:"third", note:"F#3"}, {role:"fifth", note:"A3"}, {role:"root", note:"D4"}] }
+                { name: "I", voices: [{role:"root", note:"D3"}, {role:"third", note:"F#3"}, {role:"fifth", note:"A3"}, {role:"empty", note:""}] }
             ]},
             "G": { name: "G-dur", chords: [
-                { name: "I", voices: [{role:"root", note:"G2"}, {role:"third", note:"B2"}, {role:"fifth", note:"D3"}, {role:"root", note:"G3"}] },
-                { name: "IV", voices: [{role:"root", note:"C3"}, {role:"third", note:"E3"}, {role:"fifth", note:"G3"}, {role:"root", note:"C4"}] },
+                { name: "I", voices: [{role:"root", note:"G2"}, {role:"third", note:"B2"}, {role:"fifth", note:"D3"}, {role:"empty", note:""}] },
+                { name: "IV", voices: [{role:"root", note:"C3"}, {role:"third", note:"E3"}, {role:"fifth", note:"G3"}, {role:"empty", note:""}] },
                 { name: "V7", voices: [{role:"root", note:"D3"}, {role:"third", note:"F#3"}, {role:"fifth", note:"A3"}, {role:"seventh", note:"C4"}] },
-                { name: "I", voices: [{role:"root", note:"G2"}, {role:"third", note:"B2"}, {role:"fifth", note:"D3"}, {role:"root", note:"G3"}] }
+                { name: "I", voices: [{role:"root", note:"G2"}, {role:"third", note:"B2"}, {role:"fifth", note:"D3"}, {role:"empty", note:""}] }
             ]}
         };
 
         const dataMoll = {
             "C": { name: "c-moll", chords: [
-                { name: "I", voices: [{role:"root", note:"C3"}, {role:"third", note:"Eb3"}, {role:"fifth", note:"G3"}, {role:"root", note:"C4"}] },
-                { name: "IV", voices: [{role:"root", note:"F3"}, {role:"third", note:"Ab3"}, {role:"fifth", note:"C4"}, {role:"root", note:"F4"}] },
+                { name: "I", voices: [{role:"root", note:"C3"}, {role:"third", note:"Eb3"}, {role:"fifth", note:"G3"}, {role:"empty", note:""}] },
+                { name: "IV", voices: [{role:"root", note:"F3"}, {role:"third", note:"Ab3"}, {role:"fifth", note:"C4"}, {role:"empty", note:""}] },
                 { name: "V7", voices: [{role:"root", note:"G3"}, {role:"third", note:"B3"}, {role:"fifth", note:"D4"}, {role:"seventh", note:"F4"}] },
-                { name: "I", voices: [{role:"root", note:"C3"}, {role:"third", note:"Eb3"}, {role:"fifth", note:"G3"}, {role:"root", note:"C4"}] }
+                { name: "I", voices: [{role:"root", note:"C3"}, {role:"third", note:"Eb3"}, {role:"fifth", note:"G3"}, {role:"empty", note:""}] }
             ]},
             "F": { name: "f-moll", chords: [
-                { name: "I", voices: [{role:"root", note:"F3"}, {role:"third", note:"Ab3"}, {role:"fifth", note:"C4"}, {role:"root", note:"F4"}] },
-                { name: "IV", voices: [{role:"root", note:"Bb2"}, {role:"third", note:"Db3"}, {role:"fifth", note:"F3"}, {role:"root", note:"Bb3"}] },
+                { name: "I", voices: [{role:"root", note:"F3"}, {role:"third", note:"Ab3"}, {role:"fifth", note:"C4"}, {role:"empty", note:""}] },
+                { name: "IV", voices: [{role:"root", note:"Bb2"}, {role:"third", note:"Db3"}, {role:"fifth", note:"F3"}, {role:"empty", note:""}] },
                 { name: "V7", voices: [{role:"root", note:"C3"}, {role:"third", note:"E3"}, {role:"fifth", note:"G3"}, {role:"seventh", note:"Bb3"}] },
-                { name: "I", voices: [{role:"root", note:"F3"}, {role:"third", note:"Ab3"}, {role:"fifth", note:"C4"}, {role:"root", note:"F4"}] }
+                { name: "I", voices: [{role:"root", note:"F3"}, {role:"third", note:"Ab3"}, {role:"fifth", note:"C4"}, {role:"empty", note:""}] }
             ]},
             "Bb": { name: "b-moll", chords: [
-                { name: "I", voices: [{role:"root", note:"Bb2"}, {role:"third", note:"Db3"}, {role:"fifth", note:"F3"}, {role:"root", note:"Bb3"}] },
-                { name: "IV", voices: [{role:"root", note:"Eb3"}, {role:"third", note:"Gb3"}, {role:"fifth", note:"Bb3"}, {role:"root", note:"Eb4"}] },
+                { name: "I", voices: [{role:"root", note:"Bb2"}, {role:"third", note:"Db3"}, {role:"fifth", note:"F3"}, {role:"empty", note:""}] },
+                { name: "IV", voices: [{role:"root", note:"Eb3"}, {role:"third", note:"Gb3"}, {role:"fifth", note:"Bb3"}, {role:"empty", note:""}] },
                 { name: "V7", voices: [{role:"root", note:"F3"}, {role:"third", note:"A3"}, {role:"fifth", note:"C4"}, {role:"seventh", note:"Eb4"}] },
-                { name: "I", voices: [{role:"root", note:"Bb2"}, {role:"third", note:"Db3"}, {role:"fifth", note:"F3"}, {role:"root", note:"Bb3"}] }
+                { name: "I", voices: [{role:"root", note:"Bb2"}, {role:"third", note:"Db3"}, {role:"fifth", note:"F3"}, {role:"empty", note:""}] }
             ]},
             "Eb": { name: "es-moll", chords: [
-                { name: "I", voices: [{role:"root", note:"Eb3"}, {role:"third", note:"Gb3"}, {role:"fifth", note:"Bb3"}, {role:"root", note:"Eb4"}] },
-                { name: "IV", voices: [{role:"root", note:"Ab3"}, {role:"third", note:"Cb4"}, {role:"fifth", note:"Eb4"}, {role:"root", note:"Ab4"}] },
+                { name: "I", voices: [{role:"root", note:"Eb3"}, {role:"third", note:"Gb3"}, {role:"fifth", note:"Bb3"}, {role:"empty", note:""}] },
+                { name: "IV", voices: [{role:"root", note:"Ab3"}, {role:"third", note:"Cb4"}, {role:"fifth", note:"Eb4"}, {role:"empty", note:""}] },
                 { name: "V7", voices: [{role:"root", note:"Bb2"}, {role:"third", note:"D3"}, {role:"fifth", note:"F3"}, {role:"seventh", note:"Ab3"}] },
-                { name: "I", voices: [{role:"root", note:"Eb3"}, {role:"third", note:"Gb3"}, {role:"fifth", note:"Bb3"}, {role:"root", note:"Eb4"}] }
+                { name: "I", voices: [{role:"root", note:"Eb3"}, {role:"third", note:"Gb3"}, {role:"fifth", note:"Bb3"}, {role:"empty", note:""}] }
             ]},
             "Ab": { name: "as-moll", chords: [
-                { name: "I", voices: [{role:"root", note:"Ab3"}, {role:"third", note:"Cb4"}, {role:"fifth", note:"Eb4"}, {role:"root", note:"Ab4"}] },
-                { name: "IV", voices: [{role:"root", note:"Db3"}, {role:"third", note:"Fb3"}, {role:"fifth", note:"Ab3"}, {role:"root", note:"Db4"}] },
+                { name: "I", voices: [{role:"root", note:"Ab3"}, {role:"third", note:"Cb4"}, {role:"fifth", note:"Eb4"}, {role:"empty", note:""}] },
+                { name: "IV", voices: [{role:"root", note:"Db3"}, {role:"third", note:"Fb3"}, {role:"fifth", note:"Ab3"}, {role:"empty", note:""}] },
                 { name: "V7", voices: [{role:"root", note:"Eb3"}, {role:"third", note:"G3"}, {role:"fifth", note:"Bb3"}, {role:"seventh", note:"Db4"}] },
-                { name: "I", voices: [{role:"root", note:"Ab3"}, {role:"third", note:"Cb4"}, {role:"fifth", note:"Eb4"}, {role:"root", note:"Ab4"}] }
+                { name: "I", voices: [{role:"root", note:"Ab3"}, {role:"third", note:"Cb4"}, {role:"fifth", note:"Eb4"}, {role:"empty", note:""}] }
             ]},
             "Db": { name: "des-moll", chords: [
-                { name: "I", voices: [{role:"root", note:"Db3"}, {role:"third", note:"Fb3"}, {role:"fifth", note:"Ab3"}, {role:"root", note:"Db4"}] },
-                { name: "IV", voices: [{role:"root", note:"Gb3"}, {role:"third", note:"Bbb3"}, {role:"fifth", note:"Db4"}, {role:"root", note:"Gb4"}] },
+                { name: "I", voices: [{role:"root", note:"Db3"}, {role:"third", note:"Fb3"}, {role:"fifth", note:"Ab3"}, {role:"empty", note:""}] },
+                { name: "IV", voices: [{role:"root", note:"Gb3"}, {role:"third", note:"Bbb3"}, {role:"fifth", note:"Db4"}, {role:"empty", note:""}] },
                 { name: "V7", voices: [{role:"root", note:"Ab3"}, {role:"third", note:"C4"}, {role:"fifth", note:"Eb4"}, {role:"seventh", note:"Gb4"}] },
-                { name: "I", voices: [{role:"root", note:"Db3"}, {role:"third", note:"Fb3"}, {role:"fifth", note:"Ab3"}, {role:"root", note:"Db4"}] }
+                { name: "I", voices: [{role:"root", note:"Db3"}, {role:"third", note:"Fb3"}, {role:"fifth", note:"Ab3"}, {role:"empty", note:""}] }
             ]},
             "Gb": { name: "ges-moll", chords: [
-                { name: "I", voices: [{role:"root", note:"Gb3"}, {role:"third", note:"Bbb3"}, {role:"fifth", note:"Db4"}, {role:"root", note:"Gb4"}] },
-                { name: "IV", voices: [{role:"root", note:"Cb3"}, {role:"third", note:"Ebb4"}, {role:"fifth", note:"Gb4"}, {role:"root", note:"Cb4"}] },
+                { name: "I", voices: [{role:"root", note:"Gb3"}, {role:"third", note:"Bbb3"}, {role:"fifth", note:"Db4"}, {role:"empty", note:""}] },
+                { name: "IV", voices: [{role:"root", note:"Cb3"}, {role:"third", note:"Ebb4"}, {role:"fifth", note:"Gb4"}, {role:"empty", note:""}] },
                 { name: "V7", voices: [{role:"root", note:"Db3"}, {role:"third", note:"F3"}, {role:"fifth", note:"Ab3"}, {role:"seventh", note:"Cb4"}] },
-                { name: "I", voices: [{role:"root", note:"Gb3"}, {role:"third", note:"Bbb3"}, {role:"fifth", note:"Db4"}, {role:"root", note:"Gb4"}] }
+                { name: "I", voices: [{role:"root", note:"Gb3"}, {role:"third", note:"Bbb3"}, {role:"fifth", note:"Db4"}, {role:"empty", note:""}] }
             ]},
             "B": { name: "h-moll", chords: [
-                { name: "I", voices: [{role:"root", note:"B2"}, {role:"third", note:"D3"}, {role:"fifth", note:"F#3"}, {role:"root", note:"B3"}] },
-                { name: "IV", voices: [{role:"root", note:"E3"}, {role:"third", note:"G3"}, {role:"fifth", note:"B3"}, {role:"root", note:"E4"}] },
+                { name: "I", voices: [{role:"root", note:"B2"}, {role:"third", note:"D3"}, {role:"fifth", note:"F#3"}, {role:"empty", note:""}] },
+                { name: "IV", voices: [{role:"root", note:"E3"}, {role:"third", note:"G3"}, {role:"fifth", note:"B3"}, {role:"empty", note:""}] },
                 { name: "V7", voices: [{role:"root", note:"F#3"}, {role:"third", note:"A#3"}, {role:"fifth", note:"C#4"}, {role:"seventh", note:"E4"}] },
-                { name: "I", voices: [{role:"root", note:"B2"}, {role:"third", note:"D3"}, {role:"fifth", note:"F#3"}, {role:"root", note:"B3"}] }
+                { name: "I", voices: [{role:"root", note:"B2"}, {role:"third", note:"D3"}, {role:"fifth", note:"F#3"}, {role:"empty", note:""}] }
             ]},
             "E": { name: "e-moll", chords: [
-                { name: "I", voices: [{role:"root", note:"E3"}, {role:"third", note:"G3"}, {role:"fifth", note:"B3"}, {role:"root", note:"E4"}] },
-                { name: "IV", voices: [{role:"root", note:"A3"}, {role:"third", note:"C4"}, {role:"fifth", note:"E4"}, {role:"root", note:"A4"}] },
+                { name: "I", voices: [{role:"root", note:"E3"}, {role:"third", note:"G3"}, {role:"fifth", note:"B3"}, {role:"empty", note:""}] },
+                { name: "IV", voices: [{role:"root", note:"A3"}, {role:"third", note:"C4"}, {role:"fifth", note:"E4"}, {role:"empty", note:""}] },
                 { name: "V7", voices: [{role:"root", note:"B2"}, {role:"third", note:"D#3"}, {role:"fifth", note:"F#3"}, {role:"seventh", note:"A3"}] },
-                { name: "I", voices: [{role:"root", note:"E3"}, {role:"third", note:"G3"}, {role:"fifth", note:"B3"}, {role:"root", note:"E4"}] }
+                { name: "I", voices: [{role:"root", note:"E3"}, {role:"third", note:"G3"}, {role:"fifth", note:"B3"}, {role:"empty", note:""}] }
             ]},
             "A": { name: "a-moll", chords: [
-                { name: "I", voices: [{role:"root", note:"A2"}, {role:"third", note:"C3"}, {role:"fifth", note:"E3"}, {role:"root", note:"A3"}] },
-                { name: "IV", voices: [{role:"root", note:"D3"}, {role:"third", note:"F3"}, {role:"fifth", note:"A3"}, {role:"root", note:"D4"}] },
+                { name: "I", voices: [{role:"root", note:"A2"}, {role:"third", note:"C3"}, {role:"fifth", note:"E3"}, {role:"empty", note:""}] },
+                { name: "IV", voices: [{role:"root", note:"D3"}, {role:"third", note:"F3"}, {role:"fifth", note:"A3"}, {role:"empty", note:""}] },
                 { name: "V7", voices: [{role:"root", note:"E3"}, {role:"third", note:"G#3"}, {role:"fifth", note:"B3"}, {role:"seventh", note:"D4"}] },
-                { name: "I", voices: [{role:"root", note:"A2"}, {role:"third", note:"C3"}, {role:"fifth", note:"E3"}, {role:"root", note:"A3"}] }
+                { name: "I", voices: [{role:"root", note:"A2"}, {role:"third", note:"C3"}, {role:"fifth", note:"E3"}, {role:"empty", note:""}] }
             ]},
             "D": { name: "d-moll", chords: [
-                { name: "I", voices: [{role:"root", note:"D3"}, {role:"third", note:"F3"}, {role:"fifth", note:"A3"}, {role:"root", note:"D4"}] },
-                { name: "IV", voices: [{role:"root", note:"G3"}, {role:"third", note:"Bb3"}, {role:"fifth", note:"D4"}, {role:"root", note:"G4"}] },
+                { name: "I", voices: [{role:"root", note:"D3"}, {role:"third", note:"F3"}, {role:"fifth", note:"A3"}, {role:"empty", note:""}] },
+                { name: "IV", voices: [{role:"root", note:"G3"}, {role:"third", note:"Bb3"}, {role:"fifth", note:"D4"}, {role:"empty", note:""}] },
                 { name: "V7", voices: [{role:"root", note:"A2"}, {role:"third", note:"C#3"}, {role:"fifth", note:"E3"}, {role:"seventh", note:"G3"}] },
-                { name: "I", voices: [{role:"root", note:"D3"}, {role:"third", note:"F3"}, {role:"fifth", note:"A3"}, {role:"root", note:"D4"}] }
+                { name: "I", voices: [{role:"root", note:"D3"}, {role:"third", note:"F3"}, {role:"fifth", note:"A3"}, {role:"empty", note:""}] }
             ]},
             "G": { name: "g-moll", chords: [
-                { name: "I", voices: [{role:"root", note:"G2"}, {role:"third", note:"Bb2"}, {role:"fifth", note:"D3"}, {role:"root", note:"G3"}] },
-                { name: "IV", voices: [{role:"root", note:"C3"}, {role:"third", note:"Eb3"}, {role:"fifth", note:"G3"}, {role:"root", note:"C4"}] },
+                { name: "I", voices: [{role:"root", note:"G2"}, {role:"third", note:"Bb2"}, {role:"fifth", note:"D3"}, {role:"empty", note:""}] },
+                { name: "IV", voices: [{role:"root", note:"C3"}, {role:"third", note:"Eb3"}, {role:"fifth", note:"G3"}, {role:"empty", note:""}] },
                 { name: "V7", voices: [{role:"root", note:"D3"}, {role:"third", note:"F#3"}, {role:"fifth", note:"A3"}, {role:"seventh", note:"C4"}] },
-                { name: "I", voices: [{role:"root", note:"G2"}, {role:"third", note:"Bb2"}, {role:"fifth", note:"D3"}, {role:"root", note:"G3"}] }
+                { name: "I", voices: [{role:"root", note:"G2"}, {role:"third", note:"Bb2"}, {role:"fifth", note:"D3"}, {role:"empty", note:""}] }
             ]}
         };
 
         function initKeySelects() {
-            // ランダム用調プルダウンの初期化（最初は「未選択」を空値で挿入）
             const randSelect = document.getElementById("randKeySelect");
             randSelect.innerHTML = '<option value="">-- 調を選択 --</option>';
             cycleKeys.forEach(k => {
@@ -306,7 +308,6 @@
                 randSelect.appendChild(opt);
             });
 
-            // ビジュアル表用調プルダウンの初期化（こちらは従来通りデフォルトB-durなど）
             const visSelect = document.getElementById("visualKeySelect");
             visSelect.innerHTML = "";
             cycleKeys.forEach(k => {
@@ -329,23 +330,29 @@
             const tbody = document.getElementById("visualTableBody");
             tbody.innerHTML = "";
 
-            const partNames = ["第1声部 (低)", "第2声部", "第3声部", "第4声部 (高)"];
+            // 上から順（第4声部〜第1声部）に逆順変更
+            const partNames = ["第4声部 (高)", "第3声部", "第2声部", "第1声部 (低)"];
 
-            for (let i = 0; i < 4; i++) {
+            for (let i = 3; i >= 0; i--) {
                 let tr = document.createElement("tr");
 
                 let tdLabel = document.createElement("td");
                 tdLabel.className = "role-label";
-                tdLabel.innerText = partNames[i];
+                tdLabel.innerText = partNames[3 - i];
                 tr.appendChild(tdLabel);
 
                 item.chords.forEach(chord => {
                     let td = document.createElement("td");
                     let v = chord.voices[i];
                     td.className = getRoleClass(v.role);
-                    let germ = toGermanNote(v.note);
-                    td.innerHTML = `<div>${germ} <span style="font-size:0.75rem; opacity:0.8;">(${v.note.replace('b','♭').replace('#','♯')})</span></div>` +
-                                   `<div style="font-size:0.7rem; margin-top:2px; font-weight:normal; opacity:0.9;">[${getRoleLabel(v.role)}]</div>`;
+                    
+                    if (v.role === 'empty') {
+                        td.innerHTML = `<div style="color: #adb5bd;">-</div><div style="font-size:0.7rem; margin-top:2px; font-weight:normal;">[空白]</div>`;
+                    } else {
+                        let germ = toGermanNote(v.note);
+                        td.innerHTML = `<div>${germ} <span style="font-size:0.75rem; opacity:0.8;">(${v.note.replace('b','♭').replace('#','♯')})</span></div>` +
+                                       `<div style="font-size:0.7rem; margin-top:2px; font-weight:normal; opacity:0.9;">[${getRoleLabel(v.role)}]</div>`;
+                    }
                     tr.appendChild(td);
                 });
 
@@ -366,7 +373,6 @@
             const selectedKey = document.getElementById("randKeySelect").value;
             const display = document.getElementById("voiceDisplay");
 
-            // 調が未選択（空白）の場合の処理
             if (!selectedKey) {
                 document.getElementById("randomCondition").innerText = "【出題】上のプルダウンから調を選択してください";
                 display.innerHTML = '<div style="color: #666; padding: 20px;">調を選ぶと問題が開始されます</div>';
@@ -380,21 +386,30 @@
             const chordIndex = chordIndices[Math.floor(Math.random() * chordIndices.length)];
             const chordObj = item.chords[chordIndex];
 
-            let roleToNotes = {};
-            chordObj.voices.forEach(v => {
-                if (!roleToNotes[v.role]) roleToNotes[v.role] = [];
-                roleToNotes[v.role].push(v.note);
-            });
-            if (!roleToNotes["seventh"]) {
-                roleToNotes["seventh"] = [chordObj.voices[chordObj.voices.length - 1].note];
+            // 属7 (V7) 以外は第4声部を空白にする対応
+            let template;
+            if (chordObj.name === "V7") {
+                template = randomVoicingTemplates[Math.floor(Math.random() * randomVoicingTemplates.length)];
+            } else {
+                // 属7以外の場合、第4声部（インデックス3）を強制的にemptyにする
+                let baseT = randomVoicingTemplates[Math.floor(Math.random() * randomVoicingTemplates.length)];
+                template = { roles: [baseT.roles[0], baseT.roles[1], baseT.roles[2], "empty"] };
             }
 
-            const template = randomVoicingTemplates[Math.floor(Math.random() * randomVoicingTemplates.length)];
+            let roleToNotes = {};
+            chordObj.voices.forEach(v => {
+                if (v.role !== 'empty') {
+                    if (!roleToNotes[v.role]) roleToNotes[v.role] = [];
+                    roleToNotes[v.role].push(v.note);
+                }
+            });
+            if (!roleToNotes["seventh"]) {
+                roleToNotes["seventh"] = [chordObj.voices[3].note];
+            }
 
             document.getElementById("randomCondition").innerText = 
                 `【出題】 ${item.name} ＞ ${chordObj.name}和音`;
 
-            // 下のビジュアル表の調・モードも自動連動
             document.getElementById("visualModeSelect").value = mode;
             document.getElementById("visualKeySelect").value = selectedKey;
             updateVisualTable();
@@ -404,29 +419,36 @@
             const partLabels = ["第1声部 (低)", "第2声部", "第3声部", "第4声部 (高)"];
 
             template.roles.forEach((role, idx) => {
-                let availableNotes = roleToNotes[role] || roleToNotes["root"];
-                let chosenNote = availableNotes[Math.floor(Math.random() * availableNotes.length)];
-                let germ = toGermanNote(chosenNote);
-
                 let card = document.createElement("div");
-                card.className = `voice-card ${getRoleClass(role)}`;
-                card.innerHTML = `
-                    <div class="voice-part">${partLabels[idx]}</div>
-                    <div class="voice-note">${germ} <span style="font-size:0.8rem;">(${chosenNote.replace('b','♭').replace('#','♯')})</span></div>
-                    <div style="font-size:0.75rem; margin-top:4px;">[${getRoleLabel(role)}]</div>
-                `;
+                if (role === 'empty') {
+                    card.className = "voice-card role-empty";
+                    card.innerHTML = `
+                        <div class="voice-part">${partLabels[idx]}</div>
+                        <div class="voice-note" style="color: #adb5bd;">-</div>
+                        <div style="font-size:0.75rem; margin-top:4px;">[空白]</div>
+                    `;
+                } else {
+                    let availableNotes = roleToNotes[role] || roleToNotes["root"];
+                    let chosenNote = availableNotes[Math.floor(Math.random() * availableNotes.length)];
+                    let germ = toGermanNote(chosenNote);
+
+                    card.className = `voice-card ${getRoleClass(role)}`;
+                    card.innerHTML = `
+                        <div class="voice-part">${partLabels[idx]}</div>
+                        <div class="voice-note">${germ} <span style="font-size:0.8rem;">(${chosenNote.replace('b','♭').replace('#','♯')})</span></div>
+                        <div style="font-size:0.75rem; margin-top:4px;">[${getRoleLabel(role)}]</div>
+                    `;
+                }
                 display.appendChild(card);
             });
         }
 
-        // プルダウン（長調/短調 または 調）が変更されたら自動で次の問題に進む
         function onRandSettingChange() {
             generateRandomVoice();
         }
 
         initKeySelects();
         updateVisualTable();
-        // 初期状態では未選択状態を表示させるためgenerateRandomVoiceをそのまま呼ぶ
         generateRandomVoice();
     </script>
 </body>
