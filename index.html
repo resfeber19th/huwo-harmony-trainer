@@ -19,11 +19,11 @@
         th { background: #e7f1ff; color: #004085; }
         tr:nth-child(even) { background: #fafafa; }
 
-        /* スライド風ビジュアル表のスタイル */
-        .slide-table { margin-top: 15px; }
-        .slide-table th { background: #f8f9fa; color: #333; border: 1px solid #ccc; font-size: 1rem; }
-        .slide-table td { border: 1px solid #ccc; font-size: 1.1rem; height: 40px; }
-        .highlight-row { background: #ffdfdf !important; } /* 画像のようなピンク色のハイライト */
+        /* ドイツ音名ビジュアル表：どの音を吹くべきか一目でわかるグリッド */
+        .matrix-table { margin-top: 15px; }
+        .matrix-table th { background: #f8f9fa; color: #333; border: 1px solid #ccc; font-size: 0.95rem; }
+        .matrix-table td { border: 1px solid #ccc; font-size: 1.05rem; padding: 12px 6px; color: #333; background: #fff; line-height: 1.4; }
+        .matrix-table .voice-label { background: #f1f3f5; font-weight: bold; width: 140px; font-size: 0.9rem; }
 
         #tunerDisplay { font-size: 1.5rem; font-weight: bold; margin: 5px 0; color: #333; }
         #centsDisplay { font-size: 1.1rem; font-weight: bold; margin-top: 5px; }
@@ -55,9 +55,9 @@
         </div>
     </div>
 
-    <!-- ② スライド風 カデンツ・ビジュアル表 -->
+    <!-- ② カデンツ・マトリクス確認（ドイツ音名・4声行き来対応） -->
     <div class="section">
-        <h2>カデンツ・ビジュアル確認</h2>
+        <h2>カデンツ構成音ビジュアル表（ドイツ音名）</h2>
         <div style="margin-bottom: 10px;">
             <label>調の選択: </label>
             <select id="visualModeSelect" onchange="updateVisualTable()">
@@ -69,10 +69,12 @@
             </select>
         </div>
         <h3 id="visualKeyTitle" style="margin: 5px 0 10px 0; color: #004085;">調 : --</h3>
+        <p style="font-size: 0.85rem; color: #666; margin: 5px 0 10px 0;">※ どの声部（S, A, T, B）を吹く場合でも、進行に沿って縦横自由に行き来して音を確認できます。</p>
         <div style="overflow-x: auto;">
-            <table class="slide-table" id="visualTable">
+            <table class="matrix-table" id="visualTable">
                 <thead>
                     <tr>
+                        <th style="width: 140px;">声部</th>
                         <th>I (主和音)</th>
                         <th>IV (下属音)</th>
                         <th>V (属音)</th>
@@ -87,7 +89,7 @@
 
     <!-- ③ カデンツ一覧リストセクション -->
     <div class="section">
-        <h2>カデンツ一覧（完全4度循環）</h2>
+        <h2>カデンツ一覧（完全4度循環 / ドイツ音名）</h2>
         <div>
             <label>表示モード: </label>
             <select id="modeSelect" onchange="updateTable()">
@@ -150,6 +152,7 @@
             document.getElementById("pitch442Btn").style.color = (freq === 442) ? "white" : "black";
         }
 
+        // 英語/記号表記から周波数への変換（内部保持用）
         function getFreq(noteName) {
             const baseFreqs = {
                 "C3": 130.81, "C#3": 138.59, "Db3": 138.59, "D3": 146.83, "D#3": 155.56, "Eb3": 155.56, "E3": 164.81, "F3": 174.61, "F#3": 185.00, "Gb3": 185.00, "G3": 196.00, "G#3": 207.65, "Ab3": 207.65, "A3": 220.00, "A#3": 233.08, "Bb3": 233.08, "B3": 246.94,
@@ -162,16 +165,56 @@
             return std * (A4_FREQ / 440);
         }
 
+        // 内部表記（C#, Bb等）をドイツ音名（Cis, B, B(B♭), Es等）に変換する関数
+        function toGermanNote(noteStr) {
+            if (!noteStr) return "";
+            let match = noteStr.match(/([A-G])([#b]?)([0-9])/);
+            if (!match) return noteStr;
+            let pitch = match[1];
+            let acc = match[2];
+            let oct = match[3];
+
+            let germPitch = pitch;
+            if (pitch === 'B') {
+                if (acc === 'b') germPitch = 'B';   // B♭ -> B
+                else if (acc === '') germPitch = 'H';  // B -> H
+            } else if (pitch === 'E' && acc === 'b') {
+                germPitch = 'Es';
+            } else if (pitch === 'A' && acc === 'b') {
+                germPitch = 'As';
+            } else if (pitch === 'D' && acc === 'b') {
+                germPitch = 'Des';
+            } else if (pitch === 'G' && acc === 'b') {
+                germPitch = 'Ges';
+            } else if (pitch === 'C' && acc === 'b') {
+                germPitch = 'Ces';
+            } else if (acc === '#') {
+                if (pitch === 'A') germPitch = 'Ais';
+                else if (pitch === 'C') germPitch = 'Cis';
+                else if (pitch === 'D') germPitch = 'Dis';
+                else if (pitch === 'F') germPitch = 'Fis';
+                else if (pitch === 'G') germPitch = 'Gis';
+            }
+
+            // 簡易オクターブ表記（必要に応じてオクターブ記号をつけるか、音名のみにするか。ここでは直感的な音名のみ、またはコンパクトに表示）
+            return germPitch;
+        }
+
         const cycleKeys = ["C", "F", "Bb", "Eb", "Ab", "Db", "Gb", "B", "E", "A", "D", "G"];
+        const cycleKeysGerman = {
+            "C": "C-dur / c-moll", "F": "F-dur / f-moll", "Bb": "B-dur / b-moll", "Eb": "Es-dur / es-moll",
+            "Ab": "As-dur / as-moll", "Db": "Des-dur / des-moll", "Gb": "Ges-dur / ges-moll", "B": "H-dur / h-moll",
+            "E": "E-dur / e-moll", "A": "A-dur / a-moll", "D": "D-dur / d-moll", "G": "G-dur / g-moll"
+        };
 
         const dataDur = {
             "C":  { name: "C-dur",  chords: [["E5","C5","G4","C4"], ["F5","C5","A4","F3"], ["G5","D5","G4","G3"], ["E5","C5","G4","C4"]] },
             "F":  { name: "F-dur",  chords: [["A5","F5","C5","F3"], ["Bb5","F5","D5","Bb3"], ["C6","G5","C5","C3"], ["A5","F5","C5","F3"]] },
-            "Bb": { name: "B♭-dur", chords: [["D5","Bb4","F4","Bb3"], ["Eb5","Bb4","G4","Eb3"], ["F5","A4","F4","F3"], ["D5","Bb4","F4","Bb3"]] },
-            "Eb": { name: "E♭-dur", chords: [["G5","Eb5","Bb4","Eb3"], ["Ab5","Eb5","C5","Ab3"], ["Bb5","F5","Bb4","Bb3"], ["G5","Eb5","Bb4","Eb3"]] },
-            "Ab": { name: "A♭-dur", chords: [["C6","Ab5","Eb5","Ab3"], ["Db6","Ab5","F5","Db3"], ["Eb6","Bb5","Eb5","Eb3"], ["C6","Ab5","Eb5","Ab3"]] },
-            "Db": { name: "D♭-dur", chords: [["F5","Db5","Ab4","Db4"], ["Gb5","Db5","Bb4","Gb3"], ["Ab5","Eb5","Ab4","Ab3"], ["F5","Db5","Ab4","Db4"]] },
-            "Gb": { name: "G♭-dur", chords: [["Bb5","Gb5","Db5","Gb3"], ["Cb6","Gb5","Eb5","Cb3"], ["Db6","Ab5","Db5","Db3"], ["Bb5","Gb5","Db5","Gb3"]] },
+            "Bb": { name: "B-dur",  chords: [["D5","Bb4","F4","Bb3"], ["Eb5","Bb4","G4","Eb3"], ["F5","A4","F4","F3"], ["D5","Bb4","F4","Bb3"]] },
+            "Eb": { name: "Es-dur", chords: [["G5","Eb5","Bb4","Eb3"], ["Ab5","Eb5","C5","Ab3"], ["Bb5","F5","Bb4","Bb3"], ["G5","Eb5","Bb4","Eb3"]] },
+            "Ab": { name: "As-dur", chords: [["C6","Ab5","Eb5","Ab3"], ["Db6","Ab5","F5","Db3"], ["Eb6","Bb5","Eb5","Eb3"], ["C6","Ab5","Eb5","Ab3"]] },
+            "Db": { name: "Des-dur",chords: [["F5","Db5","Ab4","Db4"], ["Gb5","Db5","Bb4","Gb3"], ["Ab5","Eb5","Ab4","Ab3"], ["F5","Db5","Ab4","Db4"]] },
+            "Gb": { name: "Ges-dur",chords: [["Bb5","Gb5","Db5","Gb3"], ["Cb6","Gb5","Eb5","Cb3"], ["Db6","Ab5","Db5","Db3"], ["Bb5","Gb5","Db5","Gb3"]] },
             "B":  { name: "H-dur",  chords: [["D#6","B5","F#5","B3"], ["E6","B5","G#5","E3"], ["F#6","C#6","F#5","F#3"], ["D#6","B5","F#5","B3"]] },
             "E":  { name: "E-dur",  chords: [["G#5","E5","B4","E3"], ["A5","E5","C#5","A3"], ["B5","F#5","B4","B3"], ["G#5","E5","B4","E3"]] },
             "A":  { name: "A-dur",  chords: [["C#6","A5","E5","A3"], ["D6","A5","F#5","D3"], ["E6","B5","E5","E3"], ["C#6","A5","E5","A3"]] },
@@ -180,33 +223,33 @@
         };
 
         const dataMoll = {
-            "C":  { name: "C-moll",  chords: [["Eb5","C5","G4","C4"], ["F5","C5","Ab4","F3"], ["G5","D5","G4","G3"], ["Eb5","C5","G4","C4"]] },
-            "F":  { name: "F-moll",  chords: [["Ab5","F5","C5","F3"], ["Bb5","F5","Db5","Bb3"], ["C6","G5","C5","C3"], ["Ab5","F5","C5","F3"]] },
-            "Bb": { name: "B♭-moll", chords: [["Db5","Bb4","F4","Bb3"], ["Eb5","Bb4","Gb4","Eb3"], ["F5","A4","F4","F3"], ["Db5","Bb4","F4","Bb3"]] },
-            "Eb": { name: "E♭-moll", chords: [["Gb5","Eb5","Bb4","Eb3"], ["Ab5","Eb5","Cb5","Ab3"], ["Bb5","D5","Bb4","Bb3"], ["Gb5","Eb5","Bb4","Eb3"]] },
-            "Ab": { name: "A♭-moll", chords: [["Cb6","Ab5","Eb5","Ab3"], ["Db6","Ab5","Fb5","Db3"], ["Eb5","Bb4","Eb5","Eb3"], ["Cb6","Ab5","Eb5","Ab3"]] },
-            "Db": { name: "D♭-moll", chords: [["Fb5","Db5","Ab4","Db4"], ["Gb5","Db5","Bbb4","Gb3"], ["Ab5","C5","Ab4","Ab3"], ["Fb5","Db5","Ab4","Db4"]] },
-            "Gb": { name: "G♭-moll", chords: [["Bbb5","Gb5","Db5","Gb3"], ["Cb6","Gb5","Ebb5","Cb3"], ["Db5","F5","Db5","Db3"], ["Bbb5","Gb5","Db5","Gb3"]] },
-            "B":  { name: "H-moll",  chords: [["D6","B5","F#5","B3"], ["E6","B5","G5","E3"], ["F#6","A#5","F#5","F#3"], ["D6","B5","F#5","B3"]] },
-            "E":  { name: "E-moll",  chords: [["G5","E5","B4","E3"], ["A5","E5","C5","A3"], ["B5","D#5","B4","B3"], ["G5","E5","B4","E3"]] },
-            "A":  { name: "A-moll",  chords: [["C6","A5","E5","A3"], ["D6","A5","F5","D3"], ["E6","G#5","E5","E3"], ["C6","A5","E5","A3"]] },
-            "D":  { name: "D-moll",  chords: [["F5","D5","A4","D4"], ["G5","D5","Bb4","G3"], ["A5","C#5","A4","A3"], ["F5","D5","A4","D4"]] },
-            "G":  { name: "G-moll",  chords: [["Bb5","G5","D5","G3"], ["C6","G5","Eb5","C3"], ["D6","F#5","D5","D3"], ["Bb5","G5","D5","G3"]] }
+            "C":  { name: "c-moll",  chords: [["Eb5","C5","G4","C4"], ["F5","C5","Ab4","F3"], ["G5","D5","G4","G3"], ["Eb5","C5","G4","C4"]] },
+            "F":  { name: "f-moll",  chords: [["Ab5","F5","C5","F3"], ["Bb5","F5","Db5","Bb3"], ["C6","G5","C5","C3"], ["Ab5","F5","C5","F3"]] },
+            "Bb": { name: "b-moll",  chords: [["Db5","Bb4","F4","Bb3"], ["Eb5","Bb4","Gb4","Eb3"], ["F5","A4","F4","F3"], ["Db5","Bb4","F4","Bb3"]] },
+            "Eb": { name: "es-moll", chords: [["Gb5","Eb5","Bb4","Eb3"], ["Ab5","Eb5","Cb5","Ab3"], ["Bb5","D5","Bb4","Bb3"], ["Gb5","Eb5","Bb4","Eb3"]] },
+            "Ab": { name: "as-moll", chords: [["Cb6","Ab5","Eb5","Ab3"], ["Db6","Ab5","Fb5","Db3"], ["Eb5","Bb4","Eb5","Eb3"], ["Cb6","Ab5","Eb5","Ab3"]] },
+            "Db": { name: "des-moll",chords: [["Fb5","Db5","Ab4","Db4"], ["Gb5","Db5","Bbb4","Gb3"], ["Ab5","C5","Ab4","Ab3"], ["Fb5","Db5","Ab4","Db4"]] },
+            "Gb": { name: "ges-moll",chords: [["Bbb5","Gb5","Db5","Gb3"], ["Cb6","Gb5","Ebb5","Cb3"], ["Db5","F5","Db5","Db3"], ["Bbb5","Gb5","Db5","Gb3"]] },
+            "B":  { name: "h-moll",  chords: [["D6","B5","F#5","B3"], ["E6","B5","G5","E3"], ["F#6","A#5","F#5","F#3"], ["D6","B5","F#5","B3"]] },
+            "E":  { name: "e-moll",  chords: [["G5","E5","B4","E3"], ["A5","E5","C5","A3"], ["B5","D#5","B4","B3"], ["G5","E5","B4","E3"]] },
+            "A":  { name: "a-moll",  chords: [["C6","A5","E5","A3"], ["D6","A5","F5","D3"], ["E6","G#5","E5","E3"], ["C6","A5","E5","A3"]] },
+            "D":  { name: "d-moll",  chords: [["F5","D5","A4","D4"], ["G5","D5","Bb4","G3"], ["A5","C#5","A4","A3"], ["F5","D5","A4","D4"]] },
+            "G":  { name: "g-moll",  chords: [["Bb5","G5","D5","G3"], ["C6","G5","Eb5","C3"], ["D6","F#5","D5","D3"], ["Bb5","G5","D5","G3"]] }
         };
 
-        // 初期化処理
         function initVisualKeySelect() {
             const select = document.getElementById("visualKeySelect");
             select.innerHTML = "";
             cycleKeys.forEach(k => {
                 let opt = document.createElement("option");
                 opt.value = k;
-                opt.innerText = k;
-                if (k === "Bb") opt.selected = true; // デフォルトB-dur等を見やすく
+                opt.innerText = cycleKeysGerman[k];
+                if (k === "Bb") opt.selected = true;
                 select.appendChild(opt);
             });
         }
 
+        // マトリクス形式（行：声部、列：和音）でドイツ音名を表示
         function updateVisualTable() {
             const mode = document.getElementById("visualModeSelect").value;
             const key = document.getElementById("visualKeySelect").value;
@@ -215,25 +258,30 @@
 
             document.getElementById("visualKeyTitle").innerText = `調 : ${item.name}`;
 
-            // item.chords は [ [Sop, Alto, Tenor, Bass], ... ] の4つ（I, IV, V, I）
-            // これを縦の行（声部ごと）に転置して表示する
             const tbody = document.getElementById("visualTableBody");
             tbody.innerHTML = "";
 
-            // 行0: ソプラノ (ハイライト)
-            // 行1: アルト
-            // 行2: テノール
-            // 行3: ベース (ハイライト)
+            const voiceLabels = [
+                "トップ声部 (Soprano)",
+                "内声 1 (Alto)",
+                "内声 2 (Tenor)",
+                "ベース声部 (Bass)"
+            ];
+
+            // 4声部それぞれを行として展開
             for (let v = 0; v < 4; v++) {
                 let tr = document.createElement("tr");
-                if (v === 0 || v === 3) {
-                    tr.className = "highlight-row";
-                }
 
+                let tdLabel = document.createElement("td");
+                tdLabel.className = "voice-label";
+                tdLabel.innerText = voiceLabels[v];
+                tr.appendChild(tdLabel);
+
+                // 4つの和音（I -> IV -> V -> I）での各声部の音名をドイツ音名で格納
                 for (let c = 0; c < 4; c++) {
                     let td = document.createElement("td");
                     let note = item.chords[c][v];
-                    td.innerText = note.replace("b", "♭").replace("#", "♯");
+                    td.innerHTML = `<strong>${toGermanNote(note)}</strong> <span style="font-size:0.75rem; color:#666;">(${note.replace('b','♭').replace('#','♯')})</span>`;
                     tr.appendChild(td);
                 }
                 tbody.appendChild(tr);
@@ -272,7 +320,7 @@
 
             document.getElementById("randomBox").style.display = "block";
             document.getElementById("randKeyMode").innerText = `調: ${item.name} ｜ 声部: ${voiceNames[voiceIndex]}`;
-            document.getElementById("randNote").innerText = noteName.replace("b", "♭").replace("#", "♯");
+            document.getElementById("randNote").innerText = `${toGermanNote(noteName)} (${noteName.replace('b','♭').replace('#','♯')})`;
             document.getElementById("randRole").innerText = `コード: ${chordNames[chordIndex]} の構成音`;
 
             playCurrentRandomTone();
@@ -351,7 +399,8 @@
 
                 item.chords.forEach(chordNotes => {
                     let tdChord = document.createElement("td");
-                    tdChord.innerHTML = chordNotes.map(n => n.replace("b","♭").replace("#","♯")).join("<br>");
+                    // 各声部をドイツ音名でリスト表示
+                    tdChord.innerHTML = chordNotes.map(n => `<strong>${toGermanNote(n)}</strong>`).join("<br>");
                     tr.appendChild(tdChord);
                 });
 
@@ -425,14 +474,14 @@
                         
                         let advice = "";
                         if (noteInfo.cents > 2) {
-                            advice = `<span style="color: #dc3545;">+${noteInfo.cents} ¢ (高い ➔ ${noteInfo.cents}セント下げる)</span>`;
+                            advice = `<span style="color: #dc3545;">+${noteInfo.cents} ¢ (高い)</span>`;
                         } else if (noteInfo.cents < -2) {
-                            advice = `<span style="color: #0056b3;">${noteInfo.cents} ¢ (低い ➔ ${Math.abs(noteInfo.cents)}セント上げる)</span>`;
+                            advice = `<span style="color: #0056b3;">${noteInfo.cents} ¢ (低い)</span>`;
                         } else {
                             advice = `<span style="color: #28a745;">±0 ¢ (ピッタシ！)</span>`;
                         }
 
-                        document.getElementById("centsDisplay").innerHTML = `音名: ${noteInfo.name} ｜ ${advice}`;
+                        document.getElementById("centsDisplay").innerHTML = `音名: <strong>${noteInfo.germName}</strong> (${noteInfo.name}) ｜ ${advice}`;
                     }
                     requestAnimationFrame(updatePitch);
                 }
@@ -460,14 +509,26 @@
         function freqToNote(freq) {
             const noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
             let midiNum = Math.round(12 * (Math.log2(freq / A4_FREQ))) + 69;
-            let noteName = noteNames[midiNum % 12].replace("#", "♯");
+            let noteName = noteNames[midiNum % 12];
             let octave = Math.floor(midiNum / 12) - 1;
+            
+            // チューナーの表示用もドイツ音名に変換
+            let tempEng = noteName.replace("#", "#") + octave;
+            // 臨時記号を考慮したドイツ音名変換
+            let germBase = noteName;
+            if (noteName === "A#") germBase = "Ais";
+            else if (noteName === "C#") germBase = "Cis";
+            else if (noteName === "D#") germBase = "Dis";
+            else if (noteName === "F#") germBase = "Fis";
+            else if (noteName === "G#") germBase = "Gis";
+            else if (noteName === "B") germBase = "H";
+            else if (noteName === "A#") germBase = "Ais";
+
             let idealFreq = A4_FREQ * Math.pow(2, (midiNum - 69) / 12);
             let cents = Math.round(1200 * Math.log2(freq / idealFreq));
-            return { name: noteName + octave, cents: cents };
+            return { name: noteName.replace("#", "♯") + octave, germName: germBase + octave, cents: cents };
         }
 
-        // 初期化実行
         initVisualKeySelect();
         updateVisualTable();
         updateTable();
