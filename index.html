@@ -41,11 +41,11 @@
         <!-- 出題対象の調を設定するエリア（プルダウン） -->
         <div class="settings-box">
             <label><strong>【ランダム出題の調】</strong></label>
-            <select id="randModeSelect" style="margin-left: 5px;">
+            <select id="randModeSelect" onchange="onRandSettingChange()" style="margin-left: 5px;">
                 <option value="dur">dur (長調)</option>
                 <option value="moll">moll (短調)</option>
             </select>
-            <select id="randKeySelect" style="margin-left: 5px;">
+            <select id="randKeySelect" onchange="onRandSettingChange()" style="margin-left: 5px;">
                 <!-- JSで動的生成 -->
             </select>
         </div>
@@ -296,18 +296,17 @@
         };
 
         function initKeySelects() {
-            // ランダム用調プルダウンの初期化
+            // ランダム用調プルダウンの初期化（最初は「未選択」を空値で挿入）
             const randSelect = document.getElementById("randKeySelect");
-            randSelect.innerHTML = "";
+            randSelect.innerHTML = '<option value="">-- 調を選択 --</option>';
             cycleKeys.forEach(k => {
                 let opt = document.createElement("option");
                 opt.value = k;
                 opt.innerText = cycleKeysGerman[k];
-                if (k === "Bb") opt.selected = true;
                 randSelect.appendChild(opt);
             });
 
-            // ビジュアル表用調プルダウンの初期化
+            // ビジュアル表用調プルダウンの初期化（こちらは従来通りデフォルトB-durなど）
             const visSelect = document.getElementById("visualKeySelect");
             visSelect.innerHTML = "";
             cycleKeys.forEach(k => {
@@ -363,9 +362,16 @@
         ];
 
         function generateRandomVoice() {
-            // ランダム設定のプルダウンから選択値を取得
             const mode = document.getElementById("randModeSelect").value;
             const selectedKey = document.getElementById("randKeySelect").value;
+            const display = document.getElementById("voiceDisplay");
+
+            // 調が未選択（空白）の場合の処理
+            if (!selectedKey) {
+                document.getElementById("randomCondition").innerText = "【出題】上のプルダウンから調を選択してください";
+                display.innerHTML = '<div style="color: #666; padding: 20px;">調を選ぶと問題が開始されます</div>';
+                return;
+            }
 
             const dataset = (mode === "dur") ? dataDur : dataMoll;
             const item = dataset[selectedKey];
@@ -393,7 +399,6 @@
             document.getElementById("visualKeySelect").value = selectedKey;
             updateVisualTable();
 
-            const display = document.getElementById("voiceDisplay");
             display.innerHTML = "";
 
             const partLabels = ["第1声部 (低)", "第2声部", "第3声部", "第4声部 (高)"];
@@ -414,8 +419,14 @@
             });
         }
 
+        // プルダウン（長調/短調 または 調）が変更されたら自動で次の問題に進む
+        function onRandSettingChange() {
+            generateRandomVoice();
+        }
+
         initKeySelects();
         updateVisualTable();
+        // 初期状態では未選択状態を表示させるためgenerateRandomVoiceをそのまま呼ぶ
         generateRandomVoice();
     </script>
 </body>
