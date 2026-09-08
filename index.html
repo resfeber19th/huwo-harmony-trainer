@@ -37,6 +37,23 @@
 
         .settings-box { background: #f8f9fa; border: 1px solid #ced4da; padding: 10px; border-radius: 6px; margin-bottom: 10px; font-size: 0.9rem; text-align: center; max-width: 650px; margin-left: auto; margin-right: auto; box-sizing: border-box; }
 
+        .title-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .title-icon {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+        }
+        h1 {
+            margin: 0;
+            font-size: 1.4rem;
+        }
+
         @media (max-width: 600px) {
             body { margin: 5px; }
             .section { padding: 10px; margin: 10px 5px; }
@@ -47,7 +64,7 @@
     </style>
 </head>
 <body>
-
+    <img src="ここに画像ファイルのパスやURL" alt="アイコン" class="title-icon">
     <h1>ハーモニー練習</h1>
 
     <!-- ランダム実践トレーニング -->
