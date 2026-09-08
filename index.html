@@ -40,7 +40,7 @@
     <!-- ランダム実践トレーニング -->
     <div class="section">
         <h2>ランダム・ボイシング実践</h2>
-        <p style="font-size: 0.85rem; color: #666;">実際の合奏でありがちな変則的な声部割り当てがランダムに出題されます。</p>
+        <p style="font-size: 0.85rem; color: #666;">カデンツ単位（I, IV, V7, I）で和音全体がランダムに出題されます。</p>
         
         <!-- 出題対象の調を設定するエリア（プルダウン） -->
         <div class="settings-box">
@@ -57,9 +57,9 @@
         <div class="random-box">
             <div id="randomCondition" style="font-weight: bold; color: #1c7ed6; font-size: 1.1rem; margin-bottom: 5px;">調名 / 和音</div>
             <div class="voice-display" id="voiceDisplay">
-                <!-- JSで動的生成 -->
+                <!-- JSで動적生成 -->
             </div>
-            <button class="main-btn" onclick="generateRandomVoice()" style="font-size: 1rem; padding: 8px 20px;">次の問題（ランダム）</button>
+            <button class="main-btn" onclick="generateRandomVoice()" style="font-size: 1rem; padding: 8px 20px;">次の和音（ランダム）</button>
         </div>
     </div>
 
@@ -140,7 +140,6 @@
             if (role === 'third') return '3音';
             if (role === 'fifth') return '5音';
             if (role === 'seventh') return '7音';
-            if (role === 'empty') return '';
             return '';
         }
 
@@ -362,14 +361,6 @@
             }
         }
 
-        const randomVoicingTemplates = [
-            { roles: ["root", "third", "fifth", "seventh"] },
-            { roles: ["third", "fifth", "fifth", "seventh"] },
-            { roles: ["root", "third", "third", "root"] },
-            { roles: ["root", "fifth", "root", "third"] },
-            { roles: ["fifth", "root", "third", "fifth"] }
-        ];
-
         function generateRandomVoice() {
             const mode = document.getElementById("randModeSelect").value;
             const selectedKey = document.getElementById("randKeySelect").value;
@@ -384,28 +375,10 @@
             const dataset = (mode === "dur") ? dataDur : dataMoll;
             const item = dataset[selectedKey];
 
-            const chordIndices = [0, 1, 2, 3]; // I, IV, V7, I
+            // I, IV, V7, I の中から1つをランダムに選出
+            const chordIndices = [0, 1, 2, 3];
             const chordIndex = chordIndices[Math.floor(Math.random() * chordIndices.length)];
             const chordObj = item.chords[chordIndex];
-
-            let template;
-            if (chordObj.name === "V7") {
-                template = randomVoicingTemplates[Math.floor(Math.random() * randomVoicingTemplates.length)];
-            } else {
-                let baseT = randomVoicingTemplates[Math.floor(Math.random() * randomVoicingTemplates.length)];
-                template = { roles: [baseT.roles[0], baseT.roles[1], baseT.roles[2], "empty"] };
-            }
-
-            let roleToNotes = {};
-            chordObj.voices.forEach(v => {
-                if (v.role !== 'empty') {
-                    if (!roleToNotes[v.role]) roleToNotes[v.role] = [];
-                    roleToNotes[v.role].push(v.note);
-                }
-            });
-            if (!roleToNotes["seventh"]) {
-                roleToNotes["seventh"] = [chordObj.voices[3].note];
-            }
 
             document.getElementById("randomCondition").innerText = 
                 `【出題】 ${item.name} ＞ ${chordObj.name}和音`;
@@ -418,19 +391,27 @@
 
             const partLabels = ["第1声部 (低)", "第2声部", "第3声部", "第4声部 (高)"];
 
-            template.roles.forEach((role, idx) => {
-                if (role === 'empty') return; // ランダム出題では空欄カード自体を表示しない
-
+            // 下から順（第1〜第4声部）に和音の構成音を表示する
+            chordObj.voices.forEach((v, idx) => {
                 let card = document.createElement("div");
-                let availableNotes = roleToNotes[role] || roleToNotes["root"];
-                let chosenNote = availableNotes[Math.floor(Math.random() * availableNotes.length)];
-                let germ = toGermanNote(chosenNote);
+                let actualRole = v.role;
+                let actualNote = v.note;
 
-                card.className = `voice-card ${getRoleClass(role)}`;
+                // 属7以外で第4声部（idx=3）が空白の場合、他の有効な声部（例: 根音など）の音を代わりに割り当てる
+                if (actualRole === 'empty') {
+                    let validVoices = chordObj.voices.filter(voice => voice.role !== 'empty');
+                    let fallbackVoice = validVoices[Math.floor(Math.random() * validVoices.length)];
+                    actualRole = fallbackVoice.role;
+                    actualNote = fallbackVoice.note;
+                }
+
+                let germ = toGermanNote(actualNote);
+
+                card.className = `voice-card ${getRoleClass(actualRole)}`;
                 card.innerHTML = `
                     <div class="voice-part">${partLabels[idx]}</div>
-                    <div class="voice-note">${germ} <span style="font-size:0.8rem;">(${chosenNote.replace('b','♭').replace('#','♯')})</span></div>
-                    <div style="font-size:0.75rem; margin-top:4px;">[${getRoleLabel(role)}]</div>
+                    <div class="voice-note">${germ} <span style="font-size:0.8rem;">(${actualNote.replace('b','♭').replace('#','♯')})</span></div>
+                    <div style="font-size:0.75rem; margin-top:4px;">[${getRoleLabel(actualRole)}]</div>
                 `;
                 display.appendChild(card);
             });
