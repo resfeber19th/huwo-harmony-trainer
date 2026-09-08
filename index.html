@@ -2,159 +2,215 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>ハーモニー・カデンツ チューナー</title>
+    <title>管楽器ソロ・ハーモニートレーナー</title>
     <style>
-        body { font-family: sans-serif; text-align: center; margin-top: 30px; background: #f4f4f9; }
-        select { font-size: 1.2rem; padding: 5px 10px; margin: 10px; }
-        .grid { display: flex; justify-content: center; gap: 15px; margin-top: 20px; flex-wrap: wrap; }
-        .chord-box { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); width: 110px; }
-        .note-btn { 
-            background: #e7f1ff; border: 1px solid #b8daff; color: #004085; 
-            padding: 6px 10px; margin: 4px 0; width: 100%; border-radius: 4px; 
-            cursor: pointer; font-weight: bold; font-size: 1rem;
-        }
-        .note-btn:hover { background: #b8daff; }
-        .play-all-btn { background: #28a745; color: white; border: none; padding: 10px 20px; font-size: 1.1rem; border-radius: 5px; cursor: pointer; margin-top: 20px; }
-        .play-all-btn:hover { background: #218838; }
+        body { font-family: sans-serif; text-align: center; margin-top: 20px; background: #f4f4f9; padding-bottom: 50px; }
+        select, button { font-size: 1.1rem; padding: 8px 14px; margin: 8px; }
+        .section { background: white; margin: 15px auto; padding: 20px; border-radius: 10px; max-width: 500px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .main-btn { background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .main-btn:hover { background: #218838; }
+        .step-display { font-size: 1.8rem; font-weight: bold; color: #0056b3; margin: 15px 0; background: #e7f1ff; padding: 15px; border-radius: 8px; }
+        .step-sub { font-size: 1rem; color: #555; }
+        #tunerDisplay { font-size: 1.6rem; font-weight: bold; margin: 10px 0; color: #333; }
+        #centsDisplay { font-size: 1.2rem; color: #666; }
+        .nav-btns { display: flex; justify-content: center; gap: 10px; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <h1>管楽器カデンツ & チューナー</h1>
+    <h1>管楽器ソロ・ハーモニートレーナー</h1>
 
-    <!-- 調の選択 -->
-    <label>調 (Key): </label>
-    <select id="keySelect" onchange="updateCadence()">
-        <option value="Bb">B♭ Major</option>
-        <option value="F">F Major</option>
-        <option value="Eb">E♭ Major</option>
-    </select>
-    <br>
-    <button class="play-all-btn" onclick="playCadenceSequence()">カデンツを続けて聴く</button>
+    <!-- ① 練習設定セクション -->
+    <div class="section">
+        <h2>練習メニュー選択</h2>
+        <div>
+            <label>調 (Key): </label>
+            <select id="keySelect" onchange="initTraining()">
+                <option value="C">C Major</option>
+                <option value="Db">D♭ Major</option>
+                <option value="D">D Major</option>
+                <option value="Eb">E♭ Major</option>
+                <option value="E">E Major</option>
+                <option value="F">F Major</option>
+                <option value="Gb">G♭ Major</option>
+                <option value="G">G Major</option>
+                <option value="Ab">A♭ Major</option>
+                <option value="A">A Major</option>
+                <option value="Bb" selected>B♭ Major</option>
+                <option value="B">B Major</option>
+            </select>
+        </div>
+        <div>
+            <label>声部 (Voice): </label>
+            <select id="voiceSelect" onchange="initTraining()">
+                <option value="0">トップ声部 (Soprano)</option>
+                <option value="1">内声 1 (Alto)</option>
+                <option value="2">内声 2 (Tenor)</option>
+                <option value="3" selected>ベース声部 (Bass)</option>
+            </select>
+        </div>
+    </div>
 
-    <!-- カデンツ表示エリア -->
-    <div class="grid" id="cadenceDisplay"></div>
+    <!-- ② 1音ずつステップ練習セクション -->
+    <div class="section">
+        <h2>カデンツ横のつながり・ステップ練習</h2>
+        <p class="step-sub">I → IV → V → I の流れで、今吹くべき音を1音ずつ提示します</p>
+        
+        <div class="step-display" id="stepDisplay">
+            <div id="stepChordName">I (B♭)</div>
+            <div id="stepNoteName" style="font-size: 2.5rem; margin: 10px 0;">--</div>
+            <div id="stepRole" style="font-size: 0.9rem; color: #666;">--</div>
+        </div>
+
+        <div class="nav-btns">
+            <button onclick="prevStep()">◀ 前の音</button>
+            <button class="main-btn" onclick="playCurrentTargetTone()">基準音を鳴らす</button>
+            <button onclick="nextStep()">次の音 ▶</button>
+        </div>
+    </div>
+
+    <!-- ③ チューナーセクション -->
+    <div class="section">
+        <h2>リアルタイム・チューナー</h2>
+        <button class="main-btn" onclick="startTuner()">マイクを起動してチューナー開始</button>
+        <div id="tunerDisplay">-- Hz</div>
+        <div id="centsDisplay">音名: -- ( 0 ¢ )</div>
+    </div>
 
     <script>
-        // 音名から周波数（Hz）を計算するための定義（コンサートピッチ 440Hz基準）
         const noteFrequencies = {
-            "C4": 261.63, "C#4": 277.18, "D4": 293.66, "D#4": 311.13, "E4": 329.63, "F4": 352.00, "F#4": 369.99, "G4": 392.00, "G#4": 415.30, "A4": 440.00, "A#4": 466.16, "B4": 493.88,
-            "C5": 523.25, "D5": 587.33, "E5": 659.25, "F5": 698.46, "G5": 783.99, "A5": 880.00, "B5": 987.77,
-            // 少し低いオクターブも必要に応じて
-            "Bb3": 233.08, "C4": 261.63, "D4": 293.66, "Eb4": 311.13, "F4": 349.23, "G4": 392.00, "Ab4": 415.30, "A4": 440.00, "Bb4": 466.16,
-            "C5": 523.25, "D5": 587.33, "Eb5": 622.25, "F5": 698.46, "G5": 783.99, "Ab5": 830.61, "Bb5": 932.33
+            "C3": 130.81, "Db3": 138.59, "D3": 146.83, "Eb3": 155.56, "E3": 164.81, "F3": 174.61, "Gb3": 185.00, "G3": 196.00, "Ab3": 207.65, "A3": 220.00, "Bb3": 233.08, "B3": 246.94,
+            "C4": 261.63, "Db4": 277.18, "D4": 293.66, "Eb4": 311.13, "E4": 329.63, "F4": 349.23, "Gb4": 369.99, "G4": 392.00, "Ab4": 415.30, "A4": 440.00, "Bb4": 466.16, "B4": 493.88,
+            "C5": 523.25, "Db5": 554.37, "D5": 587.33, "Eb5": 622.25, "E5": 659.25, "F5": 698.46, "Gb5": 739.99, "G5": 783.99, "Ab5": 830.61, "A5": 880.00, "Bb5": 932.33, "B5": 987.77
         };
 
-        // 各キーにおける滑らかな声部連結のデータ (例: 4声部 [トップ, アルト, テナー, バス])
         const cadenceData = {
-            "Bb": {
-                name: "B♭ Major",
-                chords: [
-                    { name: "I (B♭)", notes: ["D5", "Bb4", "F4", "Bb3"] },
-                    { name: "IV (E♭)", notes: ["Eb5", "Bb4", "G4", "Eb3"] },
-                    { name: "V (F)",  notes: ["F5", "A4", "F4", "F3"] },
-                    { name: "I (B♭)", notes: ["D5", "Bb4", "F4", "Bb3"] }
-                ]
-            },
-            "F": {
-                name: "F Major",
-                chords: [
-                    { name: "I (F)",  notes: ["A4", "F4", "C4", "F3"] },
-                    { name: "IV (B♭)", notes: ["Bb4", "F4", "D4", "Bb3"] },
-                    { name: "V (C)",  notes: ["C5", "E4", "G4", "C3"] },
-                    { name: "I (F)",  notes: ["A4", "F4", "C4", "F3"] }
-                ]
-            },
-            "Eb": {
-                name: "E♭ Major",
-                chords: [
-                    { name: "I (E♭)", notes: ["G4", "Eb4", "Bb3", "Eb3"] },
-                    { name: "IV (A♭)", notes: ["Ab4", "Eb4", "C4", "Ab3"] },
-                    { name: "V (B♭)", notes: ["Bb4", "D4", "F4", "Bb3"] },
-                    { name: "I (E♭)", notes: ["G4", "Eb4", "Bb3", "Eb3"] }
-                ]
-            }
+            "C":  { name: "C Major",  chords: [{name:"I (C)", notes:["E5","C5","G4","C4"]}, {name:"IV (F)", notes:["F5","C5","A4","F3"]}, {name:"V (G)", notes:["G5","D5","G4","G3"]}, {name:"I (C)", notes:["E5","C5","G4","C4"]}] },
+            "Db": { name: "D♭ Major", chords: [{name:"I (D♭)", notes:["F5","Db5","Ab4","Db4"]}, {name:"IV (G♭)", notes:["Gb5","Db5","Bb4","Gb3"]}, {name:"V (A♭)", notes:["Ab5","Eb5","Ab4","Ab3"]}, {name:"I (D♭)", notes:["F5","Db5","Ab4","Db4"]}] },
+            "D":  { name: "D Major",  chords: [{name:"I (D)", notes:["F#5","D5","A4","D4"]}, {name:"IV (G)", notes:["G5","D5","B4","G3"]}, {name:"V (A)", notes:["A5","E5","A4","A3"]}, {name:"I (D)", notes:["F#5","D5","A4","D4"]}] },
+            "Eb": { name: "E♭ Major", chords: [{name:"I (E♭)", notes:["G5","Eb5","Bb4","Eb3"]}, {name:"IV (A♭)", notes:["Ab5","Eb5","C5","Ab3"]}, {name:"V (B♭)", notes:["Bb5","F5","Bb4","Bb3"]}, {name:"I (E♭)", notes:["G5","Eb5","Bb4","Eb3"]}] },
+            "E":  { name: "E Major",  chords: [{name:"I (E)", notes:["G#5","E5","B4","E3"]}, {name:"IV (A)", notes:["A5","E5","C#5","A3"]}, {name:"V (B)", notes:["B5","F#5","B4","B3"]}, {name:"I (E)", notes:["G#5","E5","B4","E3"]}] },
+            "F":  { name: "F Major",  chords: [{name:"I (F)", notes:["A5","F5","C5","F3"]}, {name:"IV (B♭)", notes:["Bb5","F5","D5","Bb3"]}, {name:"V (C)", notes:["C6","G5","C5","C3"]}, {name:"I (F)", notes:["A5","F5","C5","F3"]}] },
+            "Gb": { name: "G♭ Major", chords: [{name:"I (G♭)", notes:["Bb5","Gb5","Db5","Gb3"]}, {name:"IV (C♭)", notes:["Cb6","Gb5","Eb5","Cb3"]}, {name:"V (D♭)", notes:["Db6","Ab5","Db5","Db3"]}, {name:"I (G♭)", notes:["Bb5","Gb5","Db5","Gb3"]}] },
+            "G":  { name: "G Major",  chords: [{name:"I (G)", notes:["B5","G5","D5","G3"]}, {name:"IV (C)", notes:["C6","G5","E5","C3"]}, {name:"V (D)", notes:["D6","A5","D5","D3"]}, {name:"I (G)", notes:["B5","G5","D5","G3"]}] },
+            "Ab": { name: "A♭ Major", chords: [{name:"I (A♭)", notes:["C6","Ab5","Eb5","Ab3"]}, {name:"IV (D♭)", notes:["Db6","Ab5","F5","Db3"]}, {name:"V (E♭)", notes:["Eb6","Bb5","Eb5","Eb3"]}, {name:"I (A♭)", notes:["C6","Ab5","Eb5","Ab3"]}] },
+            "A":  { name: "A Major",  chords: [{name:"I (A)", notes:["C#6","A5","E5","A3"]}, {name:"IV (D)", notes:["D6","A5","F#5","D3"]}, {name:"V (E)", notes:["E6","B5","E5","E3"]}, {name:"I (A)", notes:[,"C#6","A5","E5","A3"]}] },
+            "Bb": { name: "B♭ Major", chords: [{name:"I (B♭)", notes:["D5","Bb4","F4","Bb3"]}, {name:"IV (E♭)", notes:["Eb5","Bb4","G4","Eb3"]}, {name:"V (F)", notes:["F5","A4","F4","F3"]}, {name:"I (B♭)", notes:["D5","Bb4","F4","Bb3"]}] },
+            "B":  { name: "B Major",  chords: [{name:"I (B)", notes:["D#6","B5","F#5","B3"]}, {name:"IV (E)", notes:["E6","B5","G#5","E3"]}, {name:"V (F#)", notes:["F#6","C#6","F#5","F#3"]}, {name:"I (B)", notes:["D#6","B5","F#5","B3"]}] }
         };
 
-        // Web Audio APIの初期化
+        let currentStep = 0; // 0: I, 1: IV, 2: V, 3: I
+
+        function initTraining() {
+            currentStep = 0;
+            updateStepDisplay();
+        }
+
+        function updateStepDisplay() {
+            const key = document.getElementById("keySelect").value;
+            const voiceIndex = parseInt(document.getElementById("voiceSelect").value);
+            const data = cadenceData[key];
+            const chord = data.chords[currentStep];
+            const note = chord.notes[voiceIndex];
+
+            let displayName = note.replace("b", "♭").replace("#", "♯");
+
+            document.getElementById("stepChordName").innerText = `${currentStep + 1}番目のコード: ${chord.name}`;
+            document.getElementById("stepNoteName").innerText = displayName;
+            document.getElementById("stepRole").innerText = `カデンツ進行: I → IV → V → I (ステップ ${currentStep + 1}/4)`;
+        }
+
+        function nextStep() {
+            currentStep = (currentStep + 1) % 4;
+            updateStepDisplay();
+            playCurrentTargetTone();
+        }
+
+        function prevStep() {
+            currentStep = (currentStep - 3 + 4) % 4;
+            updateStepDisplay();
+            playCurrentTargetTone();
+        }
+
         let audioCtx = null;
+        function playCurrentTargetTone() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
 
-        function playTone(noteName, duration = 1.0) {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-
+            const key = document.getElementById("keySelect").value;
+            const voiceIndex = parseInt(document.getElementById("voiceSelect").value);
+            const noteName = cadenceData[key].chords[currentStep].notes[voiceIndex];
             const freq = noteFrequencies[noteName];
             if (!freq) return;
 
             const osc = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-
-            // 管楽器っぽい柔らかい音にするため 'sine' または 'triangle' を使う
-            osc.type = 'triangle'; 
+            const gain = audioCtx.createGain();
+            osc.type = 'triangle';
             osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-
-            // 音のフェードイン・フェードアウト（プチッというノイズを防ぐ）
-            gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
-            gainNode.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.05);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-
-            osc.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-
-            osc.start();
-            osc.stop(audioCtx.currentTime + duration);
-        }
-
-        function updateCadence() {
-            const selectedKey = document.getElementById("keySelect").value;
-            const data = cadenceData[selectedKey];
-            const display = document.getElementById("cadenceDisplay");
             
-            display.innerHTML = "";
+            gain.gain.setValueAtTime(0, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 2.0);
 
-            data.chords.forEach(chord => {
-                let box = document.createElement("div");
-                box.className = "chord-box";
-                box.innerHTML = `<h3>${chord.name}</h3>`;
-                
-                chord.notes.forEach(note => {
-                    // フラットやシャープを見やすく整形（例: "Bb" -> "B♭"）
-                    let displayName = note.replace("b", "♭").replace("#", "♯").slice(0, -1);
-                    let btn = document.createElement("button");
-                    btn.className = "note-btn";
-                    btn.innerText = displayName;
-                    // ボタンを押したらその音が鳴る
-                    btn.onclick = () => playTone(note, 1.5);
-                    box.appendChild(btn);
-                });
-
-                display.appendChild(box);
-            });
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 2.0);
         }
 
-        // カデンツ全体を順番に鳴らす機能
-        function playCadenceSequence() {
-            const selectedKey = document.getElementById("keySelect").value;
-            const data = cadenceData[selectedKey];
-            let delay = 0;
+        // --- チューナー機能 ---
+        async function startTuner() {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                const source = audioCtx.createMediaStreamSource(stream);
+                const analyser = audioCtx.createAnalyser();
+                analyser.fftSize = 2048;
+                source.connect(analyser);
 
-            data.chords.forEach((chord, index) => {
-                setTimeout(() => {
-                    chord.notes.forEach(note => {
-                        playTone(note, 1.2);
-                    });
-                }, delay);
-                delay += 1200; // 次のコードまでの間隔（ミリ秒）
-            });
+                const buffer = new Float32Array(analyser.fftSize);
+                function updatePitch() {
+                    analyser.getFloatTimeDomainData(buffer);
+                    let freq = autoCorrelate(buffer, audioCtx.sampleRate);
+                    if (freq !== -1) {
+                        document.getElementById("tunerDisplay").innerText = freq.toFixed(1) + " Hz";
+                        let noteInfo = freqToNote(freq);
+                        document.getElementById("centsDisplay").innerText = `音名: ${noteInfo.name} (${noteInfo.cents > 0 ? "+" : ""}${noteInfo.cents} ¢)`;
+                    }
+                    requestAnimationFrame(updatePitch);
+                }
+                updatePitch();
+            } catch (err) {
+                alert("マイクの許可が必要です。");
+            }
         }
 
-        // 初期表示
-        updateCadence();
+        function autoCorrelate(buffer, sampleRate) {
+            let SIZE = buffer.length, sum = 0;
+            for(let i=0; i<SIZE; i++) sum += buffer[i] * buffer[i];
+            if (Math.sqrt(sum/SIZE) < 0.01) return -1;
+            let r1=0, r2=SIZE-1, threshold=0.2;
+            for(let i=0; i<SIZE/2; i++) if(Math.abs(buffer[i])<threshold){r1=i; break;}
+            for(let i=1; i<SIZE/2; i++) if(Math.abs(buffer[SIZE-i])<threshold){r2=SIZE-i; break;}
+            let buf = buffer.slice(r1, r2), c = new Array(buf.length).fill(0);
+            for (let i=0; i<buf.length; i++) for (let j=0; j<buf.length-i; j++) c[i] += buf[j]*buf[j+i];
+            let d=0; while(c[d]>c[d+1]) d++;
+            let maxval=-1, maxpos=-1;
+            for(let i=d; i<buf.length; i++) if(c[i]>maxval){maxval=c[i]; maxpos=i;}
+            return sampleRate/maxpos;
+        }
+
+        function freqToNote(freq) {
+            const noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+            let midiNum = Math.round(12 * (Math.log2(freq / 440))) + 69;
+            let noteName = noteNames[midiNum % 12].replace("#", "♯");
+            let octave = Math.floor(midiNum / 12) - 1;
+            let idealFreq = 440 * Math.pow(2, (midiNum - 69) / 12);
+            let cents = Math.round(1200 * Math.log2(freq / idealFreq));
+            return { name: noteName + octave, cents: cents };
+        }
+
+        initTraining();
     </script>
-
 </body>
 </html>
