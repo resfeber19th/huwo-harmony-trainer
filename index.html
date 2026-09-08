@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ハーモニー練習 お助けサイト</title>
+    <title>ハーモニー練習</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
@@ -11,16 +11,16 @@
 </head>
 <body>
 
-    <h1>ハーモニー練習 お助けサイト</h1>
+    <h1>ハーモニー練習</h1>
 
     <!-- ランダム実践トレーニング -->
     <div class="section">
         <div class="settings-box">
             <label><strong>【進行・調選択】</strong></label><br>
             <select id="randModeSelect" onchange="onRandSettingChange()" style="margin-top: 5px;">
-                <option value="dur">dur (長調 カデンツ)</option>
-                <option value="moll">moll (短調 カデンツ)</option>
-                <option value="parallel">スケール同時進行練習</option>
+                <option value="dur">長調 カデンツ</option>
+                <option value="moll">短調 カデンツ</option>
+                <option value="parallel">スケール練習α</option>
                 <option value="kanon">カノン進行 (長調)</option>
             </select>
             <select id="randKeySelect" onchange="onRandSettingChange()" style="margin-top: 5px;">
@@ -43,8 +43,8 @@
         <div style="margin-bottom: 10px;">
             <label style="font-size: 0.9rem;">進行・調: </label><br>
             <select id="visualModeSelect" onchange="updateVisualTable()" style="margin-top: 5px;">
-                <option value="dur">dur (長調 カデンツ)</option>
-                <option value="moll">moll (短調 カデンツ)</option>
+                <option value="dur">長調 カデンツ</option>
+                <option value="moll">短調 カデンツ</option>
                 <option value="kanon">カノン進行 (長調)</option>
             </select>
             <select id="visualKeySelect" onchange="updateVisualTable()" style="margin-top: 5px;">
