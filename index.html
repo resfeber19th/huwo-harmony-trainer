@@ -22,7 +22,6 @@
         .matrix-table .role-label { background: #f1f3f5; font-weight: bold; width: 100px; font-size: 0.85rem; text-align: left; padding-left: 10px; position: sticky; left: 0; z-index: 2; border-right: 2px solid #bbb; }
         .matrix-table thead th:first-child { position: sticky; left: 0; z-index: 3; }
 
-        /* カラーユニバーサルデザイン（CUD）対応の配色定義 */
         .role-root { background-color: #ffd8d8; color: #9c0000; font-weight: bold; border-bottom: 3px solid #e03131; }
         .role-third { background-color: #d0ebff; color: #1864ab; font-weight: bold; border-bottom: 3px solid #1c7ed6; }
         .role-fifth { background-color: #e5dbff; color: #5f3dc4; font-weight: bold; border-bottom: 3px solid #7950f2; }
@@ -31,16 +30,17 @@
 
         .random-box { background: #e7f5ff; border: 2px solid #74c0fc; padding: 15px; border-radius: 8px; margin-top: 15px; box-sizing: border-box; }
         .voice-display { display: flex; justify-content: center; gap: 8px; margin: 15px 0; flex-wrap: wrap; }
-        .voice-card { background: white; border: 1px solid #adb5bd; border-radius: 6px; padding: 8px 10px; min-width: 80px; flex: 1; max-width: 110px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); box-sizing: border-box; }
-        .voice-part { font-size: 0.75rem; color: #666; margin-bottom: 4px; border-bottom: 1px solid #eee; padding-bottom: 2px; }
-        .voice-note { font-size: 1.1rem; font-weight: bold; }
+        .voice-card { background: white; border: 1px solid #adb5bd; border-radius: 6px; padding: 8px 10px; min-width: 80px; flex: 1; max-width: 110px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); box-sizing: border-box; cursor: pointer; transition: transform 0.1s, opacity 0.2s; position: relative; }
+        .voice-card:hover { transform: translateY(-2px); }
+        .voice-card.hidden-note .voice-note-content { filter: blur(5px); opacity: 0.3; user-select: none; }
+        .hidden-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; color: #495057; background: rgba(255,255,255,0.7); border-radius: 6px; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
+        .voice-card.hidden-note .hidden-overlay { opacity: 1; }
 
         .settings-box { background: #f8f9fa; border: 1px solid #ced4da; padding: 10px; border-radius: 6px; margin-bottom: 10px; font-size: 0.9rem; text-align: center; max-width: 650px; margin-left: auto; margin-right: auto; box-sizing: border-box; }
+        
+        .tip-text { font-size: 0.8rem; color: #666; margin-top: 5px; }
 
-        h1 {
-            margin: 15px 0;
-            font-size: 1.4rem;
-        }
+        h1 { margin: 15px 0; font-size: 1.4rem; }
 
         @media (max-width: 600px) {
             body { margin: 5px; }
@@ -55,7 +55,6 @@
 
     <h1>ハーモニー練習</h1>
 
-    <!-- ランダム実践トレーニング -->
     <div class="section">
         <div class="settings-box">
             <label><strong>【進行・調選択】</strong></label><br>
@@ -66,20 +65,18 @@
                 <option value="kanon">カノン進行 (長調)</option>
             </select>
             <select id="randKeySelect" onchange="onRandSettingChange()" style="margin-top: 5px;">
-                <!-- JSで動的生成 -->
             </select>
         </div>
 
         <div class="random-box">
             <div id="randomCondition" style="font-weight: bold; color: #1c7ed6; font-size: 1.1rem; margin-bottom: 5px;">調名</div>
             <div class="voice-display" id="voiceDisplay">
-                <!-- JSで動的生成 -->
             </div>
-            <button id="newPatternBtn" class="main-btn" onclick="if(window.confirm('別のパターンを作成してもいいですか？')){generateRandomCadenceNotes();}" style="font-size: 1rem; padding: 10px 20px; width: 100%; max-width: 300px;">新規パターン作成</button>
+            <div class="tip-text">カードをタップすると音名を隠したり表示したりできます</div>
+            <button id="newPatternBtn" class="main-btn" onclick="generateRandomCadenceNotes();" style="font-size: 1rem; padding: 10px 20px; width: 100%; max-width: 300px; margin-top: 10px;">新規パターン作成</button>
         </div>
     </div>
 
-    <!-- カデンツ・マトリクス確認 -->
     <div class="section">
         <h2 style="font-size: 1.2rem;">一覧</h2>
         <div style="margin-bottom: 10px;">
@@ -91,7 +88,6 @@
                 <option value="kanon">カノン進行 (長調)</option>
             </select>
             <select id="visualKeySelect" onchange="updateVisualTable()" style="margin-top: 5px;">
-                <!-- JSで動的に生成 -->
             </select>
         </div>
         <h3 id="visualKeyTitle" style="margin: 5px 0 10px 0; color: #004085; font-size: 1.05rem;">調 : --</h3>
@@ -99,7 +95,6 @@
             <table class="matrix-table" id="visualTable">
                 <thead>
                     <tr id="visualTableHeadRow">
-                        <!-- JSで動的生成 -->
                     </tr>
                 </thead>
                 <tbody id="visualTableBody"></tbody>
@@ -658,11 +653,24 @@
                 let cents = getCentsText(actualRole, mode, chordObj.name);
 
                 card.className = `voice-card ${getRoleClass(actualRole)}`;
+                // 「第何音か（根音・3音など）」をカードのタイトル（常時表示）にし、音名をぼかし対象（hidden-note）にしました
                 card.innerHTML = `
-                    <div class="voice-part">${idx + 1}. ${chordObj.name} (${roleLabelName})</div>
-                    <div class="voice-note">${germ} <span style="font-size:0.7rem; font-weight:normal;">[${cents}]</span></div>
+                    <div class="voice-part" style="font-weight: bold; font-size: 0.9rem; margin-bottom: 4px;">${idx + 1}. ${chordObj.name} (${roleLabelName})</div>
+                    <div class="voice-note-content">
+                        <div class="voice-note" style="font-size: 1.1rem;">${germ} <span style="font-size:0.7rem; font-weight:normal;">[${cents}]</span></div>
+                    </div>
+                    <div class="hidden-overlay">?</div>
                 `;
-                display.appendChild(card);
+                
+                // 初期状態で音名（.voice-note-content）を隠す（＝hidden-noteクラスを付与）
+                card.classList.add('hidden-note');
+
+                // タップで音名の表示/非表示を切り替え
+                card.addEventListener('click', () => {
+                    card.classList.toggle('hidden-note');
+                });
+
+                display.append(card);
             });
         }
 
