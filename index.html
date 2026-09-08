@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>管楽器ハーモニー・カデンツ トレーナー</title>
+    <title>ハーモニー練習　お助けサイト</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
@@ -35,16 +35,14 @@
 </head>
 <body>
 
-    <h1>管楽器ハーモニー・カデンツ トレーナー</h1>
+    <h1>ハーモニー練習　お助けサイト</h1>
 
     <!-- ランダム実践トレーニング -->
     <div class="section">
-        <h2>ランダム・カデンツ実践 (1451 各和音から1音)</h2>
-        <p style="font-size: 0.85rem; color: #666;">I → IV → V7 → I の各和音からそれぞれランダムに1音ずつピックアップして出題されます。</p>
         
         <!-- 出題対象の調を設定するエリア（プルダウン） -->
         <div class="settings-box">
-            <label><strong>【ランダム出題の調】</strong></label>
+            <label><strong>【調選択】</strong></label>
             <select id="randModeSelect" onchange="onRandSettingChange()" style="margin-left: 5px;">
                 <option value="dur">dur (長調)</option>
                 <option value="moll">moll (短調)</option>
@@ -59,13 +57,13 @@
             <div class="voice-display" id="voiceDisplay">
                 <!-- JSで動的生成 -->
             </div>
-            <button class="main-btn" onclick="generateRandomCadenceNotes()" style="font-size: 1rem; padding: 8px 20px;">次の問題（ランダム）</button>
+            <button class="main-btn" onclick="generateRandomCadenceNotes()" style="font-size: 1rem; padding: 8px 20px;">別のパターンを試す</button>
         </div>
     </div>
 
     <!-- カデンツ・マトリクス確認（下から 根・3・5・7順、縦列逆順） -->
     <div class="section">
-        <h2>コードトーン追跡ビジュアル表（ドイツ音名 ＆ 純正律ピッチ）</h2>
+        <h2>表</h2>
         <div style="margin-bottom: 10px;">
             <label>調の選択: </label>
             <select id="visualModeSelect" onchange="updateVisualTable()">
@@ -77,16 +75,15 @@
             </select>
         </div>
         <h3 id="visualKeyTitle" style="margin: 5px 0 10px 0; color: #004085;">調 : --</h3>
-        <p style="font-size: 0.85rem; color: #666; margin: 5px 0 10px 0;">※ 上から順に「第4声部（高音域）〜第1声部（低音域）」へ配置しています（属7以外は第4声部空白）。</p>
         <div style="overflow-x: auto;">
             <table class="matrix-table" id="visualTable">
                 <thead>
                     <tr>
                         <th style="width: 140px;">声部</th>
-                        <th>I (主和音)</th>
-                        <th>IV (下属音)</th>
-                        <th>V7 (属七)</th>
-                        <th>I (解決)</th>
+                        <th>I (主和音・トニック)</th>
+                        <th>IV (下属音・サブドミナント)</th>
+                        <th>V7 (属七・ドミナント)</th>
+                        <th>I (主和音・トニック)</th>
                     </tr>
                 </thead>
                 <tbody id="visualTableBody"></tbody>
@@ -351,7 +348,7 @@
             const tbody = document.getElementById("visualTableBody");
             tbody.innerHTML = "";
 
-            const partNames = ["第4声部 (高)", "第3声部", "第2声部", "第1声部 (低)"];
+            const partNames = ["7音", "5音", "3音", "根音"];
 
             for (let i = 3; i >= 0; i--) {
                 let tr = document.createElement("tr");
@@ -388,9 +385,6 @@
 
             const dataset = (mode === "dur") ? dataDur : dataMoll;
             const item = dataset[selectedKey];
-
-            document.getElementById("randomCondition").innerText = 
-                `【出題】 ${item.name} の 1451進行（各和音から1音ピックアップ）`;
 
             document.getElementById("visualModeSelect").value = mode;
             document.getElementById("visualKeySelect").value = selectedKey;
