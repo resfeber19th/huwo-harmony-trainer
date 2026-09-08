@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ハーモニー練習 お助けサイト</title>
+    <title>ハーモニー練習</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
@@ -48,7 +48,7 @@
 </head>
 <body>
 
-    <h1>ハーモニー練習 お助けサイト</h1>
+    <h1>ハーモニー練習</h1>
 
     <!-- ランダム実践トレーニング -->
     <div class="section">
@@ -70,13 +70,13 @@
             <div class="voice-display" id="voiceDisplay">
                 <!-- JSで動的生成 -->
             </div>
-            <button class="main-btn" onclick="if(window.confirm('別のパターンを作成してもいいですか？')){generateRandomCadenceNotes();}" style="font-size: 1rem; padding: 10px 20px; width: 100%; max-width: 300px;">新規パターン作成</button>
+            <button id="newPatternBtn" class="main-btn" onclick="if(window.confirm('別のパターンを作成してもいいですか？')){generateRandomCadenceNotes();}" style="font-size: 1rem; padding: 10px 20px; width: 100%; max-width: 300px;">新規パターン作成</button>
         </div>
     </div>
 
     <!-- カデンツ・マトリクス確認 -->
     <div class="section">
-        <h2 style="font-size: 1.2rem;">マトリクス表確認</h2>
+        <h2 style="font-size: 1.2rem;">一覧</h2>
         <div style="margin-bottom: 10px;">
             <label style="font-size: 0.9rem;">進行・調: </label><br>
             <select id="visualModeSelect" onchange="updateVisualTable()" style="margin-top: 5px;">
@@ -591,14 +591,18 @@
             const mode = document.getElementById("randModeSelect").value;
             const selectedKey = document.getElementById("randKeySelect").value;
             const display = document.getElementById("voiceDisplay");
+            const newPatternBtn = document.getElementById("newPatternBtn");
 
             document.getElementById("visualModeSelect").value = mode;
             document.getElementById("visualKeySelect").value = selectedKey;
             updateVisualTable();
 
             if (mode === "parallel") {
+                newPatternBtn.style.display = "none";
                 generateParallelPattern(selectedKey);
                 return;
+            } else {
+                newPatternBtn.style.display = "inline-block";
             }
 
             const dataset = getDataset(mode);
