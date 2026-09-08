@@ -3,9 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>管楽器ハーモニー・カデンツ トレーナー</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: sans-serif; text-align: center; margin: 20px; background: #f4f4f9; padding-bottom: 50px; }
-        select, button { font-size: 1rem; padding: 6px 10px; margin: 5px; }
+        body { font-family: 'Noto Sans JP', sans-serif; text-align: center; margin: 20px; background: #f4f4f9; padding-bottom: 50px; }
+        select, button { font-size: 1rem; padding: 6px 10px; margin: 5px; font-family: 'Noto Sans JP', sans-serif; }
         .section { background: white; margin: 15px auto; padding: 15px; border-radius: 10px; max-width: 800px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .main-btn { background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
         .main-btn:hover { background: #218838; }
@@ -137,7 +140,7 @@
             if (role === 'third') return '3音';
             if (role === 'fifth') return '5音';
             if (role === 'seventh') return '7音';
-            if (role === 'empty') return '空白';
+            if (role === 'empty') return '';
             return '';
         }
 
@@ -330,7 +333,6 @@
             const tbody = document.getElementById("visualTableBody");
             tbody.innerHTML = "";
 
-            // 上から順（第4声部〜第1声部）に逆順変更
             const partNames = ["第4声部 (高)", "第3声部", "第2声部", "第1声部 (低)"];
 
             for (let i = 3; i >= 0; i--) {
@@ -347,7 +349,7 @@
                     td.className = getRoleClass(v.role);
                     
                     if (v.role === 'empty') {
-                        td.innerHTML = `<div style="color: #adb5bd;">-</div><div style="font-size:0.7rem; margin-top:2px; font-weight:normal;">[空白]</div>`;
+                        td.innerHTML = `<div style="color: #adb5bd;">-</div>`;
                     } else {
                         let germ = toGermanNote(v.note);
                         td.innerHTML = `<div>${germ} <span style="font-size:0.75rem; opacity:0.8;">(${v.note.replace('b','♭').replace('#','♯')})</span></div>` +
@@ -386,12 +388,10 @@
             const chordIndex = chordIndices[Math.floor(Math.random() * chordIndices.length)];
             const chordObj = item.chords[chordIndex];
 
-            // 属7 (V7) 以外は第4声部を空白にする対応
             let template;
             if (chordObj.name === "V7") {
                 template = randomVoicingTemplates[Math.floor(Math.random() * randomVoicingTemplates.length)];
             } else {
-                // 属7以外の場合、第4声部（インデックス3）を強制的にemptyにする
                 let baseT = randomVoicingTemplates[Math.floor(Math.random() * randomVoicingTemplates.length)];
                 template = { roles: [baseT.roles[0], baseT.roles[1], baseT.roles[2], "empty"] };
             }
@@ -419,26 +419,19 @@
             const partLabels = ["第1声部 (低)", "第2声部", "第3声部", "第4声部 (高)"];
 
             template.roles.forEach((role, idx) => {
-                let card = document.createElement("div");
-                if (role === 'empty') {
-                    card.className = "voice-card role-empty";
-                    card.innerHTML = `
-                        <div class="voice-part">${partLabels[idx]}</div>
-                        <div class="voice-note" style="color: #adb5bd;">-</div>
-                        <div style="font-size:0.75rem; margin-top:4px;">[空白]</div>
-                    `;
-                } else {
-                    let availableNotes = roleToNotes[role] || roleToNotes["root"];
-                    let chosenNote = availableNotes[Math.floor(Math.random() * availableNotes.length)];
-                    let germ = toGermanNote(chosenNote);
+                if (role === 'empty') return; // ランダム出題では空欄カード自体を表示しない
 
-                    card.className = `voice-card ${getRoleClass(role)}`;
-                    card.innerHTML = `
-                        <div class="voice-part">${partLabels[idx]}</div>
-                        <div class="voice-note">${germ} <span style="font-size:0.8rem;">(${chosenNote.replace('b','♭').replace('#','♯')})</span></div>
-                        <div style="font-size:0.75rem; margin-top:4px;">[${getRoleLabel(role)}]</div>
-                    `;
-                }
+                let card = document.createElement("div");
+                let availableNotes = roleToNotes[role] || roleToNotes["root"];
+                let chosenNote = availableNotes[Math.floor(Math.random() * availableNotes.length)];
+                let germ = toGermanNote(chosenNote);
+
+                card.className = `voice-card ${getRoleClass(role)}`;
+                card.innerHTML = `
+                    <div class="voice-part">${partLabels[idx]}</div>
+                    <div class="voice-note">${germ} <span style="font-size:0.8rem;">(${chosenNote.replace('b','♭').replace('#','♯')})</span></div>
+                    <div style="font-size:0.75rem; margin-top:4px;">[${getRoleLabel(role)}]</div>
+                `;
                 display.appendChild(card);
             });
         }
