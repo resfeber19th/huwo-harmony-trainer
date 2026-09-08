@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>ハーモニー・カデンツ チューナー</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; margin-top: 50px; background: #f4f4f9; }
+        select, button { font-size: 1.2rem; padding: 5px 10px; margin: 10px; }
+        .grid { display: flex; justify-content: center; gap: 20px; margin-top: 20px; }
+        .chord-box { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); width: 100px; }
+    </style>
+</head>
+<body>
+
+    <h1>管楽器カデンツ & チューナー</h1>
+
+    <!-- 調の選択 -->
+    <label>調 (Key): </label>
+    <select id="keySelect" onchange="updateCadence()">
+        <option value="Bb">B♭ Major (コンサートピッチ)</option>
+        <option value="F">F Major (コンサートピッチ)</option>
+        <option value="Eb">E♭ Major (コンサートピッチ)</option>
+    </select>
+
+    <!-- カデンツ表示エリア -->
+    <div class="grid" id="cadenceDisplay">
+        <!-- JavaScriptでここにI-IV-V-Iの音を動的に表示します -->
+    </div>
+
+    <script>
+        // 各キーにおける滑らかな声部連結のデータ例 (トップ声部、バス声部など)
+        const cadenceData = {
+            "Bb": {
+                name: "B♭ Major",
+                chords: [
+                    { name: "I (B♭)", notes: ["D", "B♭", "F", "B♭"] },
+                    { name: "IV (E♭)", notes: ["E♭", "B♭", "G", "E♭"] },
+                    { name: "V (F)",  notes: ["F", "A", "F", "F"] },
+                    { name: "I (B♭)", notes: ["D", "B♭", "F", "B♭"] }
+                ]
+            },
+            "F": {
+                name: "F Major",
+                chords: [
+                    { name: "I (F)",  notes: ["A", "F", "C", "F"] },
+                    { name: "IV (B♭)", notes: ["B♭", "F", "D", "B♭"] },
+                    { name: "V (C)",  notes: ["C", "E", "G", "C"] },
+                    { name: "I (F)",  notes: ["A", "F", "C", "F"] }
+                ]
+            },
+            "Eb": {
+                name: "E♭ Major",
+                chords: [
+                    { name: "I (E♭)", notes: ["G", "E♭", "B♭", "E♭"] },
+                    { name: "IV (A♭)", notes: ["A♭", "E♭", "C", "A♭"] },
+                    { name: "V (B♭)", notes: ["B♭", "D", "F", "B♭"] },
+                    { name: "I (E♭)", notes: ["G", "E♭", "B♭", "E♭"] }
+                ]
+            }
+        };
+
+        function updateCadence() {
+            const selectedKey = document.getElementById("keySelect").value;
+            const data = cadenceData[selectedKey];
+            const display = document.getElementById("cadenceDisplay");
+            
+            display.innerHTML = ""; // 一旦クリア
+
+            data.chords.forEach(chord => {
+                let box = document.createElement("div");
+                box.className = "chord-box";
+                box.innerHTML = `<h3>${chord.name}</h3>` + 
+                                chord.notes.map(n => `<p style="margin:5px 0; font-weight:bold; color:#0056b3;">${n}</p>`).join("");
+                display.appendChild(box);
+            });
+        }
+
+        // 初期表示
+        updateCadence();
+    </script>
+
+</body>
+</html>
