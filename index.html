@@ -25,10 +25,10 @@
         .role-empty { background-color: #f8f9fa; color: #adb5bd; font-style: italic; }
 
         .random-box { background: #e7f5ff; border: 2px solid #74c0fc; padding: 15px; border-radius: 8px; margin-top: 15px; }
-        .cadence-display { display: flex; justify-content: center; gap: 15px; margin: 15px 0; flex-wrap: wrap; }
-        .chord-card { background: white; border: 1px solid #adb5bd; border-radius: 6px; padding: 10px; min-width: 150px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .chord-title { font-size: 1rem; font-weight: bold; color: #004085; margin-bottom: 8px; border-bottom: 2px solid #74c0fc; padding-bottom: 4px; }
-        .voice-row { font-size: 0.85rem; margin: 4px 0; text-align: left; padding: 2px 4px; border-radius: 4px; }
+        .voice-display { display: flex; justify-content: center; gap: 10px; margin: 15px 0; flex-wrap: wrap; }
+        .voice-card { background: white; border: 1px solid #adb5bd; border-radius: 6px; padding: 10px 15px; min-width: 110px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .voice-part { font-size: 0.8rem; color: #666; margin-bottom: 4px; border-bottom: 1px solid #eee; padding-bottom: 2px; }
+        .voice-note { font-size: 1.3rem; font-weight: bold; }
 
         .settings-box { background: #f8f9fa; border: 1px solid #ced4da; padding: 10px; border-radius: 6px; margin-bottom: 10px; font-size: 0.9rem; text-align: center; max-width: 650px; margin-left: auto; margin-right: auto; }
     </style>
@@ -39,8 +39,8 @@
 
     <!-- ランダム実践トレーニング -->
     <div class="section">
-        <h2>ランダム・カデンツ実践 (1451)</h2>
-        <p style="font-size: 0.85rem; color: #666;">指定した調の「1451（I → IV → V7 → I）」の進行全体がランダムに出題されます。</p>
+        <h2>ランダム・カデンツ実践 (1451 各和音から1音)</h2>
+        <p style="font-size: 0.85rem; color: #666;">I → IV → V7 → I の各和音からそれぞれランダムに1音ずつピックアップして出題されます。</p>
         
         <!-- 出題対象の調を設定するエリア（プルダウン） -->
         <div class="settings-box">
@@ -56,10 +56,10 @@
 
         <div class="random-box">
             <div id="randomCondition" style="font-weight: bold; color: #1c7ed6; font-size: 1.1rem; margin-bottom: 5px;">調名</div>
-            <div class="cadence-display" id="cadenceDisplay">
+            <div class="voice-display" id="voiceDisplay">
                 <!-- JSで動的生成 -->
             </div>
-            <button class="main-btn" onclick="generateRandomCadence()" style="font-size: 1rem; padding: 8px 20px;">次の調・問題（ランダム）</button>
+            <button class="main-btn" onclick="generateRandomCadenceNotes()" style="font-size: 1rem; padding: 8px 20px;">次の問題（ランダム）</button>
         </div>
     </div>
 
@@ -362,56 +362,61 @@
             }
         }
 
-        function generateRandomCadence() {
+        function generateRandomCadenceNotes() {
             const mode = document.getElementById("randModeSelect").value;
             const selectedKey = document.getElementById("randKeySelect").value;
-            const display = document.getElementById("cadenceDisplay");
+            const display = document.getElementById("voiceDisplay");
 
             const dataset = (mode === "dur") ? dataDur : dataMoll;
             const item = dataset[selectedKey];
 
             document.getElementById("randomCondition").innerText = 
-                `【出題カデンツ】 ${item.name} の 1451進行`;
+                `【出題】 ${item.name} の 1451進行（各和音から1音ピックアップ）`;
 
             document.getElementById("visualModeSelect").value = mode;
             document.getElementById("visualKeySelect").value = selectedKey;
             updateVisualTable();
 
             display.innerHTML = "";
-            const partLabels = ["第1声部 (低)", "第2声部", "第3声部", "第4声部 (高)"];
 
-            // I, IV, V7, I の各コードごとにカードを作成
+            // I, IV, V7, I の各コードからランダムに1つの声部（音）をピックアップしてカード表示
             item.chords.forEach(chordObj => {
                 let card = document.createElement("div");
-                card.className = "chord-card";
 
-                let html = `<div class="chord-title">${chordObj.name}</div>`;
+                // 有効な声部または空白でないものからランダムに1つ選択
+                let validVoices = chordObj.voices.map((v, idx) => ({ voice: v, index: idx }));
+                let chosen = validVoices[Math.floor(Math.random() * validVoices.length)];
+                
+                let actualRole = chosen.voice.role;
+                let actualNote = chosen.voice.note;
 
-                // 下から順（第1〜第4声部）に声部情報を追加
-                chordObj.voices.forEach((v, idx) => {
-                    if (v.role === 'empty') {
-                        html += `<div class="voice-row role-empty" style="padding: 4px;">${partLabels[idx]}: -</div>`;
-                    } else {
-                        let germ = toGermanNote(v.note);
-                        html += `<div class="voice-row ${getRoleClass(v.role)}">
-                            <div style="font-size:0.7rem; opacity:0.8;">${partLabels[idx]}</div>
-                            <div style="font-size:1.1rem; font-weight:bold;">${germ} <span style="font-size:0.75rem;">(${v.note.replace('b','♭').replace('#','♯')})</span> [${getRoleLabel(v.role)}]</div>
-                        </div>`;
-                    }
-                });
+                // もし選ばれた声部が空白（empty）なら、他の有効な音を代わりに割り当てる
+                if (actualRole === 'empty') {
+                    let non-empty = chordObj.voices.filter(v => v.role !== 'empty');
+                    let fallback = non-empty[Math.floor(Math.random() * non-empty.length)];
+                    actualRole = fallback.role;
+                    actualNote = fallback.note;
+                }
 
-                card.innerHTML = html;
+                let germ = toGermanNote(actualNote);
+
+                card.className = `voice-card ${getRoleClass(actualRole)}`;
+                card.innerHTML = `
+                    <div class="voice-part">${chordObj.name} 和音</div>
+                    <div class="voice-note">${germ} <span style="font-size:0.8rem;">(${actualNote.replace('b','♭').replace('#','♯')})</span></div>
+                    <div style="font-size:0.75rem; margin-top:4px;">[${getRoleLabel(actualRole)}]</div>
+                `;
                 display.appendChild(card);
             });
         }
 
         function onRandSettingChange() {
-            generateRandomCadence();
+            generateRandomCadenceNotes();
         }
 
         initKeySelects();
         updateVisualTable();
-        generateRandomCadence();
+        generateRandomCadenceNotes();
     </script>
 </body>
 </html>
