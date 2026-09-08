@@ -25,10 +25,10 @@
         .role-empty { background-color: #f8f9fa; color: #adb5bd; font-style: italic; }
 
         .random-box { background: #e7f5ff; border: 2px solid #74c0fc; padding: 15px; border-radius: 8px; margin-top: 15px; }
-        .voice-display { display: flex; justify-content: center; gap: 10px; margin: 15px 0; flex-wrap: wrap; }
-        .voice-card { background: white; border: 1px solid #adb5bd; border-radius: 6px; padding: 10px 15px; min-width: 100px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .voice-part { font-size: 0.8rem; color: #666; margin-bottom: 4px; }
-        .voice-note { font-size: 1.3rem; font-weight: bold; }
+        .cadence-display { display: flex; justify-content: center; gap: 15px; margin: 15px 0; flex-wrap: wrap; }
+        .chord-card { background: white; border: 1px solid #adb5bd; border-radius: 6px; padding: 10px; min-width: 150px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .chord-title { font-size: 1rem; font-weight: bold; color: #004085; margin-bottom: 8px; border-bottom: 2px solid #74c0fc; padding-bottom: 4px; }
+        .voice-row { font-size: 0.85rem; margin: 4px 0; text-align: left; padding: 2px 4px; border-radius: 4px; }
 
         .settings-box { background: #f8f9fa; border: 1px solid #ced4da; padding: 10px; border-radius: 6px; margin-bottom: 10px; font-size: 0.9rem; text-align: center; max-width: 650px; margin-left: auto; margin-right: auto; }
     </style>
@@ -39,7 +39,9 @@
 
     <!-- ランダム実践トレーニング -->
     <div class="section">
-        <h2>調選択</h2>        
+        <h2>ランダム・カデンツ実践 (1451)</h2>
+        <p style="font-size: 0.85rem; color: #666;">指定した調の「1451（I → IV → V7 → I）」の進行全体がランダムに出題されます。</p>
+        
         <!-- 出題対象の調を設定するエリア（プルダウン） -->
         <div class="settings-box">
             <label><strong>【ランダム出題の調】</strong></label>
@@ -53,11 +55,11 @@
         </div>
 
         <div class="random-box">
-            <div id="randomCondition" style="font-weight: bold; color: #1c7ed6; font-size: 1.1rem; margin-bottom: 5px;">調名 / 和音</div>
-            <div class="voice-display" id="voiceDisplay">
-                <!-- JSで動적生成 -->
+            <div id="randomCondition" style="font-weight: bold; color: #1c7ed6; font-size: 1.1rem; margin-bottom: 5px;">調名</div>
+            <div class="cadence-display" id="cadenceDisplay">
+                <!-- JSで動的生成 -->
             </div>
-            <button class="main-btn" onclick="generateRandomVoice()" style="font-size: 1rem; padding: 8px 20px;">次の和音（ランダム）</button>
+            <button class="main-btn" onclick="generateRandomCadence()" style="font-size: 1rem; padding: 8px 20px;">次の調・問題（ランダム）</button>
         </div>
     </div>
 
@@ -300,11 +302,12 @@
 
         function initKeySelects() {
             const randSelect = document.getElementById("randKeySelect");
-            randSelect.innerHTML = '<option value="">-- 調を選択 --</option>';
+            randSelect.innerHTML = "";
             cycleKeys.forEach(k => {
                 let opt = document.createElement("option");
                 opt.value = k;
                 opt.innerText = cycleKeysGerman[k];
+                if (k === "C") opt.selected = true;
                 randSelect.appendChild(opt);
             });
 
@@ -314,7 +317,7 @@
                 let opt = document.createElement("option");
                 opt.value = k;
                 opt.innerText = cycleKeysGerman[k];
-                if (k === "Bb") opt.selected = true;
+                if (k === "C") opt.selected = true;
                 visSelect.appendChild(opt);
             });
         }
@@ -359,69 +362,56 @@
             }
         }
 
-        function generateRandomVoice() {
+        function generateRandomCadence() {
             const mode = document.getElementById("randModeSelect").value;
             const selectedKey = document.getElementById("randKeySelect").value;
-            const display = document.getElementById("voiceDisplay");
-
-            if (!selectedKey) {
-                document.getElementById("randomCondition").innerText = "【出題】上のプルダウンから調を選択してください";
-                display.innerHTML = '<div style="color: #666; padding: 20px;">調を選ぶと問題が開始されます</div>';
-                return;
-            }
+            const display = document.getElementById("cadenceDisplay");
 
             const dataset = (mode === "dur") ? dataDur : dataMoll;
             const item = dataset[selectedKey];
 
-            // I, IV, V7, I の中から1つをランダムに選出
-            const chordIndices = [0, 1, 2, 3];
-            const chordIndex = chordIndices[Math.floor(Math.random() * chordIndices.length)];
-            const chordObj = item.chords[chordIndex];
-
             document.getElementById("randomCondition").innerText = 
-                `【出題】 ${item.name} ＞ ${chordObj.name}和音`;
+                `【出題カデンツ】 ${item.name} の 1451進行`;
 
             document.getElementById("visualModeSelect").value = mode;
             document.getElementById("visualKeySelect").value = selectedKey;
             updateVisualTable();
 
             display.innerHTML = "";
-
             const partLabels = ["第1声部 (低)", "第2声部", "第3声部", "第4声部 (高)"];
 
-            // 下から順（第1〜第4声部）に和音の構成音を表示する
-            chordObj.voices.forEach((v, idx) => {
+            // I, IV, V7, I の各コードごとにカードを作成
+            item.chords.forEach(chordObj => {
                 let card = document.createElement("div");
-                let actualRole = v.role;
-                let actualNote = v.note;
+                card.className = "chord-card";
 
-                // 属7以外で第4声部（idx=3）が空白の場合、他の有効な声部（例: 根音など）の音を代わりに割り当てる
-                if (actualRole === 'empty') {
-                    let validVoices = chordObj.voices.filter(voice => voice.role !== 'empty');
-                    let fallbackVoice = validVoices[Math.floor(Math.random() * validVoices.length)];
-                    actualRole = fallbackVoice.role;
-                    actualNote = fallbackVoice.note;
-                }
+                let html = `<div class="chord-title">${chordObj.name}</div>`;
 
-                let germ = toGermanNote(actualNote);
+                // 下から順（第1〜第4声部）に声部情報を追加
+                chordObj.voices.forEach((v, idx) => {
+                    if (v.role === 'empty') {
+                        html += `<div class="voice-row role-empty" style="padding: 4px;">${partLabels[idx]}: -</div>`;
+                    } else {
+                        let germ = toGermanNote(v.note);
+                        html += `<div class="voice-row ${getRoleClass(v.role)}">
+                            <div style="font-size:0.7rem; opacity:0.8;">${partLabels[idx]}</div>
+                            <div style="font-size:1.1rem; font-weight:bold;">${germ} <span style="font-size:0.75rem;">(${v.note.replace('b','♭').replace('#','♯')})</span> [${getRoleLabel(v.role)}]</div>
+                        </div>`;
+                    }
+                });
 
-                card.className = `voice-card ${getRoleClass(actualRole)}`;
-                card.innerHTML = `
-                    <div class="voice-part">${partLabels[idx]}</div>
-                    <div class="voice-note">${germ} <span style="font-size:0.8rem;">(${actualNote.replace('b','♭').replace('#','♯')})</span></div>
-                    <div style="font-size:0.75rem; margin-top:4px;">[${getRoleLabel(actualRole)}]</div>
-                `;
+                card.innerHTML = html;
                 display.appendChild(card);
             });
         }
 
         function onRandSettingChange() {
-            generateRandomVoice();
+            generateRandomCadence();
         }
 
         initKeySelects();
         updateVisualTable();
-        generateRandomVoice();
+        generateRandomCadence();
     </script>
 </body>
 </html>
