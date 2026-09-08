@@ -12,18 +12,25 @@
         
         .random-box { background: #e7f1ff; border: 2px solid #0056b3; border-radius: 8px; padding: 15px; margin-top: 10px; }
         .random-display { font-size: 1.8rem; font-weight: bold; color: #004085; margin: 10px 0; }
-        .random-sub { font-size: 1rem; color: #333; margin: 5px 0; }
+        .random-sub { font-size: 1.0rem; color: #333; margin: 5px 0; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.95rem; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
         th { background: #e7f1ff; color: #004085; }
         tr:nth-child(even) { background: #fafafa; }
 
-        /* ドイツ音名マトリクス表：声部ごとに1音ずつ綺麗にビジュアライズ */
-        .matrix-table { margin-top: 15px; }
+        /* コードトーン別カラー（自分がどの音を担当するかで色分け） */
+        .matrix-table { margin-top: 15px; border-collapse: separate; border-spacing: 0; }
         .matrix-table th { background: #f8f9fa; color: #333; border: 1px solid #ccc; font-size: 0.95rem; }
-        .matrix-table td { border: 1px solid #ccc; font-size: 1.1rem; padding: 12px 6px; color: #333; background: #fff; line-height: 1.4; }
-        .matrix-table .voice-label { background: #f1f3f5; font-weight: bold; width: 150px; font-size: 0.9rem; }
+        .matrix-table td { border: 1px solid #ccc; font-size: 1.1rem; padding: 12px 6px; line-height: 1.4; }
+        .matrix-table .role-label { background: #f1f3f5; font-weight: bold; width: 160px; font-size: 0.9rem; text-align: left; padding-left: 10px; }
+
+        /* 各コードトーンのテーマカラー */
+        .role-root { background-color: #ffe3e3; color: #c92a2a; font-weight: bold; } /* 根音：赤系 */
+        .role-third { background-color: #e3fafc; color: #0b7285; font-weight: bold; } /* 3音：青系 */
+        .role-fifth { background-color: #f3f0ff; color: #5f3dc4; font-weight: bold; } /* 5音：紫系 */
+        .role-seventh { background-color: #fff3bf; color: #f08c00; font-weight: bold; } /* 7音：黄系 */
+        .role-none { background-color: #f8f9fa; color: #adb5bd; }
     </style>
 </head>
 <body>
@@ -51,9 +58,9 @@
         </div>
     </div>
 
-    <!-- ② カデンツ・マトリクス確認（基本3声＋属7は4声） -->
+    <!-- ② カデンツ・マトリクス確認（コードトーン別カラー） -->
     <div class="section">
-        <h2>カデンツ構成音ビジュアル表（ドイツ音名）</h2>
+        <h2>コードトーン追跡ビジュアル表（ドイツ音名）</h2>
         <div style="margin-bottom: 10px;">
             <label>調の選択: </label>
             <select id="visualModeSelect" onchange="updateVisualTable()">
@@ -65,16 +72,16 @@
             </select>
         </div>
         <h3 id="visualKeyTitle" style="margin: 5px 0 10px 0; color: #004085;">調 : --</h3>
-        <p style="font-size: 0.85rem; color: #666; margin: 5px 0 10px 0;">※ 基本3声（主和音・下属音・解決）は各和音1音ずつ、属7（V7）のみ4和音（4声）で縦横に行き来して確認できます。</p>
+        <p style="font-size: 0.85rem; color: #666; margin: 5px 0 10px 0;">※ 自分が担当する「コードトーン（根音・3音・5音・7音）」の色を目で追いながら、進行に伴う音の変化を確認できます。</p>
         <div style="overflow-x: auto;">
             <table class="matrix-table" id="visualTable">
                 <thead>
                     <tr>
-                        <th style="width: 150px;">声部</th>
-                        <th>I (主和音・3声)</th>
-                        <th>IV (下属音・3声)</th>
-                        <th>V7 (属七・4声)</th>
-                        <th>I (解決・3声)</th>
+                        <th style="width: 160px;">担当コードトーン</th>
+                        <th>I (主和音)</th>
+                        <th>IV (下属音)</th>
+                        <th>V7 (属七)</th>
+                        <th>I (解決)</th>
                     </tr>
                 </thead>
                 <tbody id="visualTableBody"></tbody>
@@ -166,35 +173,156 @@
             "E": "E-dur / e-moll", "A": "A-dur / a-moll", "D": "D-dur / d-moll", "G": "G-dur / g-moll"
         };
 
-        // 各和音：I, IV は3声（3要素）、V7 のみ4声（4要素）
+        // 各和音の構成音（オブジェクト形式：{ root, third, fifth, seventh }）
+        // ※ 3声の和音には seventh がありません (null)
         const dataDur = {
-            "C":  { name: "C-dur",  chords: [["C5","G4","C4"], ["C5","A4","F3"], ["D5","G4","F4","G3"], ["C5","G4","C4"]] },
-            "F":  { name: "F-dur",  chords: [["F5","C5","F3"], ["F5","D5","Bb3"], ["G5","C5","Bb4","C3"], ["F5","C5","F3"]] },
-            "Bb": { name: "B-dur",  chords: [["Bb4","F4","Bb3"], ["Bb4","G4","Eb3"], ["C5","F4","Eb4","F3"], ["Bb4","F4","Bb3"]] },
-            "Eb": { name: "Es-dur", chords: [["Eb5","Bb4","Eb3"], ["Eb5","C5","Ab3"], ["F5","Bb4","Ab4","Bb3"], ["Eb5","Bb4","Eb3"]] },
-            "Ab": { name: "As-dur", chords: [["Ab5","Eb5","Ab3"], ["Ab5","F5","Db3"], ["Bb5","Eb5","Db5","Eb3"], ["Ab5","Eb5","Ab3"]] },
-            "Db": { name: "Des-dur",chords: [["Db5","Ab4","Db4"], ["Db5","Bb4","Gb3"], ["Eb5","Ab4","Gb4","Ab3"], ["Db5","Ab4","Db4"]] },
-            "Gb": { name: "Ges-dur",chords: [["Gb5","Db5","Gb3"], ["Gb5","Eb5","Cb3"], ["Ab5","Db5","Cb5","Db3"], ["Gb5","Db5","Gb3"]] },
-            "B":  { name: "H-dur",  chords: [["B5","F#5","B3"], ["B5","G#5","E3"], ["C#6","F#5","E5","F#3"], ["B5","F#5","B3"]] },
-            "E":  { name: "E-dur",  chords: [["E5","B4","E3"], ["E5","C#5","A3"], ["F#5","B4","A4","B3"], ["E5","B4","E3"]] },
-            "A":  { name: "A-dur",  chords: [["A5","E5","A3"], ["A5","F#5","D3"], ["B5","E5","D5","E3"], ["A5","E5","A3"]] },
-            "D":  { name: "D-dur",  chords: [["D5","A4","D4"], ["D5","B4","G3"], ["E5","A4","G4","A3"], ["D5","A4","D4"]] },
-            "G":  { name: "G-dur",  chords: [["G5","D5","G3"], ["G5","E5","C3"], ["A5","D5","C5","D3"], ["G5","D5","G3"]] }
+            "C":  { name: "C-dur",  chords: [
+                { root: "C4", third: "E4", fifth: "G4", seventh: null },
+                { root: "F3", third: "A4", fifth: "C5", seventh: null },
+                { root: "G3", third: "B3", fifth: "D5", seventh: "F4" },
+                { root: "C4", third: "E4", fifth: "G4", seventh: null }
+            ]},
+            "F":  { name: "F-dur",  chords: [
+                { root: "F3", third: "A4", fifth: "C5", seventh: null },
+                { root: "Bb3", third: "D5", fifth: "F5", seventh: null },
+                { root: "C3", third: "E4", fifth: "G5", seventh: "Bb4" },
+                { root: "F3", third: "A4", fifth: "C5", seventh: null }
+            ]},
+            "Bb": { name: "B-dur",  chords: [
+                { root: "Bb3", third: "D4", fifth: "F4", seventh: null },
+                { root: "Eb3", third: "G4", fifth: "Bb4", seventh: null },
+                { root: "F3", third: "A3", fifth: "C5", seventh: "Eb4" },
+                { root: "Bb3", third: "D4", fifth: "F4", seventh: null }
+            ]},
+            "Eb": { name: "Es-dur", chords: [
+                { root: "Eb3", third: "G4", fifth: "Bb4", seventh: null },
+                { root: "Ab3", third: "C5", fifth: "Eb5", seventh: null },
+                { root: "Bb3", third: "D4", fifth: "F5", seventh: "Ab4" },
+                { root: "Eb3", third: "G4", fifth: "Bb4", seventh: null }
+            ]},
+            "Ab": { name: "As-dur", chords: [
+                { root: "Ab3", third: "C5", fifth: "Eb5", seventh: null },
+                { root: "Db3", third: "F5", fifth: "Ab5", seventh: null },
+                { root: "Eb3", third: "G4", fifth: "Bb5", seventh: "Db5" },
+                { root: "Ab3", third: "C5", fifth: "Eb5", seventh: null }
+            ]},
+            "Db": { name: "Des-dur",chords: [
+                { root: "Db4", third: "F4", fifth: "Ab4", seventh: null },
+                { root: "Gb3", third: "Bb4", fifth: "Db5", seventh: null },
+                { root: "Ab3", third: "C4", fifth: "Eb5", seventh: "Gb4" },
+                { root: "Db4", third: "F4", fifth: "Ab4", seventh: null }
+            ]},
+            "Gb": { name: "Ges-dur",chords: [
+                { root: "Gb3", third: "Bb4", fifth: "Db5", seventh: null },
+                { root: "Cb3", third: "Eb5", fifth: "Gb5", seventh: null },
+                { root: "Db3", third: "F4", fifth: "Ab5", seventh: "Cb5" },
+                { root: "Gb3", third: "Bb4", fifth: "Db5", seventh: null }
+            ]},
+            "B":  { name: "H-dur",  chords: [
+                { root: "B3", third: "D#4", fifth: "F#5", seventh: null },
+                { root: "E3", third: "G#5", fifth: "B5", seventh: null },
+                { root: "F#3", third: "A#3", fifth: "C#6", seventh: "E5" },
+                { root: "B3", third: "D#4", fifth: "F#5", seventh: null }
+            ]},
+            "E":  { name: "E-dur",  chords: [
+                { root: "E3", third: "G#4", fifth: "B4", seventh: null },
+                { root: "A3", third: "C#5", fifth: "E5", seventh: null },
+                { root: "B3", third: "D#4", fifth: "F#5", seventh: "A4" },
+                { root: "E3", third: "G#4", fifth: "B4", seventh: null }
+            ]},
+            "A":  { name: "A-dur",  chords: [
+                { root: "A3", third: "C#5", fifth: "E5", seventh: null },
+                { root: "D3", third: "F#5", fifth: "A5", seventh: null },
+                { root: "E3", third: "G#4", fifth: "B5", seventh: "D5" },
+                { root: "A3", third: "C#5", fifth: "E5", seventh: null }
+            ]},
+            "D":  { name: "D-dur",  chords: [
+                { root: "D4", third: "F#4", fifth: "A4", seventh: null },
+                { root: "G3", third: "B4", fifth: "D5", seventh: null },
+                { root: "A3", third: "C#4", fifth: "E5", seventh: "G4" },
+                { root: "D4", third: "F#4", fifth: "A4", seventh: null }
+            ]},
+            "G":  { name: "G-dur",  chords: [
+                { root: "G3", third: "B4", fifth: "D5", seventh: null },
+                { root: "C3", third: "E5", fifth: "G5", seventh: null },
+                { root: "D3", third: "F#4", fifth: "A5", seventh: "C5" },
+                { root: "G3", third: "B4", fifth: "D5", seventh: null }
+            ]}
         };
 
         const dataMoll = {
-            "C":  { name: "c-moll",  chords: [["C5","G4","C4"], ["C5","Ab4","F3"], ["D5","G4","F4","G3"], ["C5","G4","C4"]] },
-            "F":  { name: "f-moll",  chords: [["F5","C5","F3"], ["F5","Db5","Bb3"], ["G5","C5","Bb4","C3"], ["F5","C5","F3"]] },
-            "Bb": { name: "b-moll",  chords: [["Bb4","F4","Bb3"], ["Bb4","Gb4","Eb3"], ["C5","F4","Eb4","F3"], ["Bb4","F4","Bb3"]] },
-            "Eb": { name: "es-moll", chords: [["Eb5","Bb4","Eb3"], ["Eb5","Cb5","Ab3"], ["F5","Bb4","Ab4","Bb3"], ["Eb5","Bb4","Eb3"]] },
-            "Ab": { name: "as-moll", chords: [["Ab5","Eb5","Ab3"], ["Ab5","Fb5","Db3"], ["Bb5","Eb5","Db5","Eb3"], ["Ab5","Eb5","Ab3"]] },
-            "Db": { name: "des-moll",chords: [["Db5","Ab4","Db4"], ["Db5","Bbb4","Gb3"], ["Eb5","Ab4","Gb4","Ab3"], ["Db5","Ab4","Db4"]] },
-            "Gb": { name: "ges-moll",chords: [["Gb5","Db5","Gb3"], ["Gb5","Ebb5","Cb3"], ["Ab5","Db5","Cb5","Db3"], ["Gb5","Db5","Gb3"]] },
-            "B":  { name: "h-moll",  chords: [["B5","F#5","B3"], ["B5","G5","E3"], ["C#6","F#5","E5","F#3"], ["B5","F#5","B3"]] },
-            "E":  { name: "e-moll",  chords: [["E5","B4","E3"], ["E5","C5","A3"], ["F#5","B4","A4","B3"], ["E5","B4","E3"]] },
-            "A":  { name: "a-moll",  chords: [["A5","E5","A3"], ["A5","F5","D3"], ["B5","E5","D5","E3"], ["A5","E5","A3"]] },
-            "D":  { name: "d-moll",  chords: [["D5","A4","D4"], ["D5","Bb4","G3"], ["E5","A4","G4","A3"], ["D5","A4","D4"]] },
-            "G":  { name: "g-moll",  chords: [["G5","D5","G3"], ["G5","Eb5","C3"], ["A5","D5","C5","D3"], ["G5","D5","G3"]] }
+            "C":  { name: "c-moll",  chords: [
+                { root: "C4", third: "Eb4", fifth: "G4", seventh: null },
+                { root: "F3", third: "Ab4", fifth: "C5", seventh: null },
+                { root: "G3", third: "B3", fifth: "D5", seventh: "F4" },
+                { root: "C4", third: "Eb4", fifth: "G4", seventh: null }
+            ]},
+            "F":  { name: "f-moll",  chords: [
+                { root: "F3", third: "Ab4", fifth: "C5", seventh: null },
+                { root: "Bb3", third: "Db5", fifth: "F5", seventh: null },
+                { root: "C3", third: "E4", fifth: "G5", seventh: "Bb4" },
+                { root: "F3", third: "Ab4", fifth: "C5", seventh: null }
+            ]},
+            "Bb": { name: "b-moll",  chords: [
+                { root: "Bb3", third: "Db4", fifth: "F4", seventh: null },
+                { root: "Eb3", third: "Gb4", fifth: "Bb4", seventh: null },
+                { root: "F3", third: "A3", fifth: "C5", seventh: "Eb4" },
+                { root: "Bb3", third: "Db4", fifth: "F4", seventh: null }
+            ]},
+            "Eb": { name: "es-moll", chords: [
+                { root: "Eb3", third: "Gb4", fifth: "Bb4", seventh: null },
+                { root: "Ab3", third: "Cb5", fifth: "Eb5", seventh: null },
+                { root: "Bb3", third: "D4", fifth: "F5", seventh: "Ab4" },
+                { root: "Eb3", third: "Gb4", fifth: "Bb4", seventh: null }
+            ]},
+            "Ab": { name: "as-moll", chords: [
+                { root: "Ab3", third: "Cb5", fifth: "Eb5", seventh: null },
+                { root: "Db3", third: "Fb5", fifth: "Ab5", seventh: null },
+                { root: "Eb3", third: "G4", fifth: "Bb5", seventh: "Db5" },
+                { root: "Ab3", third: "Cb5", fifth: "Eb5", seventh: null }
+            ]},
+            "Db": { name: "des-moll",chords: [
+                { root: "Db4", third: "Fb4", fifth: "Ab4", seventh: null },
+                { root: "Gb3", third: "Bbb4", fifth: "Db5", seventh: null },
+                { root: "Ab3", third: "C4", fifth: "Eb5", seventh: "Gb4" },
+                { root: "Db4", third: "Fb4", fifth: "Ab4", seventh: null }
+            ]},
+            "Gb": { name: "ges-moll",chords: [
+                { root: "Gb3", third: "Bbb4", fifth: "Db5", seventh: null },
+                { root: "Cb3", third: "Ebb5", fifth: "Gb5", seventh: null },
+                { root: "Db3", third: "F4", fifth: "Ab5", seventh: "Cb5" },
+                { root: "Gb3", third: "Bbb4", fifth: "Db5", seventh: null }
+            ]},
+            "B":  { name: "h-moll",  chords: [
+                { root: "B3", third: "D4", fifth: "F#5", seventh: null },
+                { root: "E3", third: "G5", fifth: "B5", seventh: null },
+                { root: "F#3", third: "A#3", fifth: "C#6", seventh: "E5" },
+                { root: "B3", third: "D4", fifth: "F#5", seventh: null }
+            ]},
+            "E":  { name: "e-moll",  chords: [
+                { root: "E3", third: "G4", fifth: "B4", seventh: null },
+                { root: "A3", third: "C5", fifth: "E5", seventh: null },
+                { root: "B3", third: "D#4", fifth: "F#5", seventh: "A4" },
+                { root: "E3", third: "G4", fifth: "B4", seventh: null }
+            ]},
+            "A":  { name: "a-moll",  chords: [
+                { root: "A3", third: "C5", fifth: "E5", seventh: null },
+                { root: "D3", third: "F5", fifth: "A5", seventh: null },
+                { root: "E3", third: "G#4", fifth: "B5", seventh: "D5" },
+                { root: "A3", third: "C5", fifth: "E5", seventh: null }
+            ]},
+            "D":  { name: "d-moll",  chords: [
+                { root: "D4", third: "F4", fifth: "A4", seventh: null },
+                { root: "G3", third: "Bb4", fifth: "D5", seventh: null },
+                { root: "A3", third: "C#4", fifth: "E5", seventh: "G4" },
+                { root: "D4", third: "F4", fifth: "A4", seventh: null }
+            ]},
+            "G":  { name: "g-moll",  chords: [
+                { root: "G3", third: "Bb4", fifth: "D5", seventh: null },
+                { root: "C3", third: "Eb5", fifth: "G5", seventh: null },
+                { root: "D3", third: "F#4", fifth: "A5", seventh: "C5" },
+                { root: "G3", third: "Bb4", fifth: "D5", seventh: null }
+            ]}
         };
 
         function initVisualKeySelect() {
@@ -209,7 +337,7 @@
             });
         }
 
-        // マトリクス表の更新（3声ベース、V7のみ4声）
+        // コードトーン別カラーのマトリクス表を更新
         function updateVisualTable() {
             const mode = document.getElementById("visualModeSelect").value;
             const key = document.getElementById("visualKeySelect").value;
@@ -221,35 +349,38 @@
             const tbody = document.getElementById("visualTableBody");
             tbody.innerHTML = "";
 
-            // 基本3声（上声、中声、低声）＋ V7用の行構成
-            // 各和音の配列インデックスから、対応する声部の音を取り出す
+            // 各行：自分がどのコードトーン担当か
             const rowsConfig = [
-                { label: "トップ声部 (Soprano)", indices: [0, 0, 0, 0] },
-                { label: "内声 (Alto/Tenor)",   indices: [1, 1, 1, 1] },
-                { label: "ベース声部 (Bass)",     indices: [2, 2, 3, 2] } // V7のときだけ4声目のインデックス(3)を割り当て
+                { label: "🔴 根音 (Root) 担当", keyName: "root", className: "role-root" },
+                { label: "🔵 3音 (Third) 担当", keyName: "third", className: "role-third" },
+                { label: "🟣 5音 (Fifth) 担当", keyName: "fifth", className: "role-fifth" },
+                { label: "🟡 7音 (Seventh) 担当", keyName: "seventh", className: "role-seventh" }
             ];
 
             rowsConfig.forEach(rowInfo => {
                 let tr = document.createElement("tr");
 
                 let tdLabel = document.createElement("td");
-                tdLabel.className = "voice-label";
+                tdLabel.className = "role-label";
                 tdLabel.innerText = rowInfo.label;
                 tr.appendChild(tdLabel);
 
-                for (let c = 0; c < 4; c++) {
+                // I, IV, V7, I の4つの和音をループ
+                item.chords.forEach(chord => {
                     let td = document.createElement("td");
-                    let chordNotes = item.chords[c];
-                    let idx = rowInfo.indices[c];
-                    
-                    if (idx < chordNotes.length) {
-                        let note = chordNotes[idx];
-                        td.innerHTML = `<strong>${toGermanNote(note)}</strong> <span style="font-size:0.75rem; color:#666;">(${note.replace('b','♭').replace('#','♯')})</span>`;
+                    let note = chord[rowInfo.keyName];
+
+                    if (note) {
+                        td.className = rowInfo.className;
+                        td.innerHTML = `<strong>${toGermanNote(note)}</strong> <span style="font-size:0.75rem; opacity:0.8;">(${note.replace('b','♭').replace('#','♯')})</span>`;
                     } else {
+                        // この和音にはそのコードトーンが存在しない場合（例：3声の和音における7音）
+                        td.className = "role-none";
                         td.innerText = "-";
                     }
                     tr.appendChild(td);
-                }
+                });
+
                 tbody.appendChild(tr);
             });
         }
@@ -277,16 +408,22 @@
             const chordIndex = Math.floor(Math.random() * 4);
             const chordNames = selectedMode === "dur" ? ["I (主和音)", "IV (下属音)", "V7 (属七)", "I (解決)"] : ["i (主和音)", "iv (下属音)", "V7 (属七)", "i (解決)"];
             
-            const chordNotes = item.chords[chordIndex];
-            const noteIndex = Math.floor(Math.random() * chordNotes.length);
-            const noteName = chordNotes[noteIndex];
+            const chord = item.chords[chordIndex];
+            // 有効なコードトーンのみをピックアップ
+            let availableTones = [];
+            if (chord.root) availableTones.push({ name: chord.root, role: "根音 (Root)" });
+            if (chord.third) availableTones.push({ name: chord.third, role: "3音 (Third)" });
+            if (chord.fifth) availableTones.push({ name: chord.fifth, role: "5音 (Fifth)" });
+            if (chord.seventh) availableTones.push({ name: chord.seventh, role: "7音 (Seventh)" });
 
-            currentRandomTask = { noteName: noteName };
+            const chosen = availableTones[Math.floor(Math.random() * availableTones.length)];
+
+            currentRandomTask = { noteName: chosen.name };
 
             document.getElementById("randomBox").style.display = "block";
-            document.getElementById("randKeyMode").innerText = `調: ${item.name}`;
-            document.getElementById("randNote").innerText = `${toGermanNote(noteName)} (${noteName.replace('b','♭').replace('#','♯')})`;
-            document.getElementById("randRole").innerText = `コード: ${chordNames[chordIndex]} の構成音`;
+            document.getElementById("randKeyMode").innerText = `調: ${item.name} ／ コード: ${chordNames[chordIndex]}`;
+            document.getElementById("randNote").innerText = `${toGermanNote(chosen.name)} (${chosen.name.replace('b','♭').replace('#','♯')})`;
+            document.getElementById("randRole").innerText = `あなたの担当役割: ${chosen.role}`;
 
             playCurrentRandomTone();
         }
@@ -317,8 +454,11 @@
             return audioCtx;
         }
 
-        function playChord(notes) {
+        function playChord(chordObj) {
             const ctx = getAudioContext();
+            let notes = [chordObj.root, chordObj.third, chordObj.fifth];
+            if (chordObj.seventh) notes.push(chordObj.seventh);
+
             notes.forEach(noteName => {
                 const freq = getFreq(noteName);
                 const osc = ctx.createOscillator();
@@ -341,12 +481,13 @@
             const dataset = (mode === "dur") ? dataDur : dataMoll;
             const chords = dataset[key].chords;
             let delay = 0;
-            chords.forEach(chordNotes => {
-                setTimeout(() => playChord(chordNotes), delay);
+            chords.forEach(chordObj => {
+                setTimeout(() => playChord(chordObj), delay);
                 delay += 1000;
             });
         }
 
+        // 下部の一覧テーブル用
         function updateTable() {
             const mode = document.getElementById("modeSelect").value;
             const dataset = (mode === "dur") ? dataDur : dataMoll;
@@ -362,9 +503,11 @@
                 tdKey.innerText = item.name;
                 tr.appendChild(tdKey);
 
-                item.chords.forEach(chordNotes => {
+                item.chords.forEach(chord => {
                     let tdChord = document.createElement("td");
-                    tdChord.innerHTML = chordNotes.map(n => `<strong>${toGermanNote(n)}</strong>`).join("<br>");
+                    let notes = [chord.root, chord.third, chord.fifth];
+                    if (chord.seventh) notes.push(chord.seventh);
+                    tdChord.innerHTML = notes.map(n => `<strong>${toGermanNote(n)}</strong>`).join("<br>");
                     tr.appendChild(tdChord);
                 });
 
