@@ -2,21 +2,25 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ハーモニー練習 お助けサイト</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Noto Sans JP', sans-serif; text-align: center; margin: 20px; background: #f4f4f9; padding-bottom: 50px; }
-        select, button { font-size: 1rem; padding: 6px 10px; margin: 5px; font-family: 'Noto Sans JP', sans-serif; }
-        .section { background: white; margin: 15px auto; padding: 15px; border-radius: 10px; max-width: 950px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        body { font-family: 'Noto Sans JP', sans-serif; text-align: center; margin: 10px; background: #f4f4f9; padding-bottom: 50px; }
+        select, button { font-size: 1rem; padding: 6px 10px; margin: 5px; font-family: 'Noto Sans JP', sans-serif; max-width: 100%; box-sizing: border-box; }
+        .section { background: white; margin: 15px auto; padding: 15px; border-radius: 10px; max-width: 950px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); box-sizing: border-box; }
         .main-btn { background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
         .main-btn:hover { background: #218838; }
 
-        .matrix-table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 15px; font-size: 0.9rem; }
-        .matrix-table th { background: #f8f9fa; color: #333; border: 1px solid #ccc; font-size: 0.85rem; padding: 8px 4px; }
-        .matrix-table td { border: 1px solid #ccc; font-size: 0.95rem; padding: 8px 4px; line-height: 1.3; text-align: center; }
-        .matrix-table .role-label { background: #f1f3f5; font-weight: bold; width: 120px; font-size: 0.85rem; text-align: left; padding-left: 10px; }
+        .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 15px; border: 1px solid #ddd; border-radius: 6px; }
+        .matrix-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.9rem; white-space: nowrap; }
+        .matrix-table th { background: #f8f9fa; color: #333; border-bottom: 1px solid #ccc; border-right: 1px solid #ccc; font-size: 0.85rem; padding: 8px 6px; }
+        .matrix-table td { border-bottom: 1px solid #ccc; border-right: 1px solid #ccc; font-size: 0.95rem; padding: 8px 6px; line-height: 1.3; text-align: center; }
+        .matrix-table th:last-child, .matrix-table td:last-child { border-right: none; }
+        .matrix-table .role-label { background: #f1f3f5; font-weight: bold; width: 100px; font-size: 0.85rem; text-align: left; padding-left: 10px; position: sticky; left: 0; z-index: 2; border-right: 2px solid #bbb; }
+        .matrix-table thead th:first-child { position: sticky; left: 0; z-index: 3; }
 
         .role-root { background-color: #ffe3e3; color: #c92a2a; font-weight: bold; }
         .role-third { background-color: #e3fafc; color: #0b7285; font-weight: bold; }
@@ -24,13 +28,22 @@
         .role-seventh { background-color: #fff3bf; color: #f08c00; font-weight: bold; }
         .role-empty { background-color: #f8f9fa; color: #adb5bd; font-style: italic; }
 
-        .random-box { background: #e7f5ff; border: 2px solid #74c0fc; padding: 15px; border-radius: 8px; margin-top: 15px; }
+        .random-box { background: #e7f5ff; border: 2px solid #74c0fc; padding: 15px; border-radius: 8px; margin-top: 15px; box-sizing: border-box; }
         .voice-display { display: flex; justify-content: center; gap: 8px; margin: 15px 0; flex-wrap: wrap; }
-        .voice-card { background: white; border: 1px solid #adb5bd; border-radius: 6px; padding: 8px 10px; min-width: 90px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .voice-card { background: white; border: 1px solid #adb5bd; border-radius: 6px; padding: 8px 10px; min-width: 80px; flex: 1; max-width: 110px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); box-sizing: border-box; }
         .voice-part { font-size: 0.75rem; color: #666; margin-bottom: 4px; border-bottom: 1px solid #eee; padding-bottom: 2px; }
         .voice-note { font-size: 1.1rem; font-weight: bold; }
 
-        .settings-box { background: #f8f9fa; border: 1px solid #ced4da; padding: 10px; border-radius: 6px; margin-bottom: 10px; font-size: 0.9rem; text-align: center; max-width: 650px; margin-left: auto; margin-right: auto; }
+        .settings-box { background: #f8f9fa; border: 1px solid #ced4da; padding: 10px; border-radius: 6px; margin-bottom: 10px; font-size: 0.9rem; text-align: center; max-width: 650px; margin-left: auto; margin-right: auto; box-sizing: border-box; }
+
+        /* スマホ向けの微調整 */
+        @media (max-width: 600px) {
+            body { margin: 5px; }
+            .section { padding: 10px; margin: 10px 5px; }
+            h1 { font-size: 1.4rem; }
+            .voice-card { min-width: 70px; padding: 6px 4px; }
+            .voice-note { font-size: 1rem; }
+        }
     </style>
 </head>
 <body>
@@ -40,13 +53,13 @@
     <!-- ランダム実践トレーニング -->
     <div class="section">
         <div class="settings-box">
-            <label><strong>【進行・調選択】</strong></label>
-            <select id="randModeSelect" onchange="onRandSettingChange()" style="margin-left: 5px;">
+            <label><strong>【進行・調選択】</strong></label><br>
+            <select id="randModeSelect" onchange="onRandSettingChange()" style="margin-top: 5px;">
                 <option value="dur">dur (長調 カデンツ)</option>
                 <option value="moll">moll (短調 カデンツ)</option>
                 <option value="kanon">カノン進行 (長調)</option>
             </select>
-            <select id="randKeySelect" onchange="onRandSettingChange()" style="margin-left: 5px;">
+            <select id="randKeySelect" onchange="onRandSettingChange()" style="margin-top: 5px;">
                 <!-- JSで動的生成 -->
             </select>
         </div>
@@ -56,30 +69,30 @@
             <div class="voice-display" id="voiceDisplay">
                 <!-- JSで動的生成 -->
             </div>
-            <button class="main-btn" onclick="generateRandomCadenceNotes()" style="font-size: 1rem; padding: 8px 20px;">別のパターンを試す</button>
+            <button class="main-btn" onclick="generateRandomCadenceNotes()" style="font-size: 1rem; padding: 10px 20px; width: 100%; max-width: 300px;">別のパターンを試す</button>
         </div>
     </div>
 
     <!-- カデンツ・マトリクス確認 -->
     <div class="section">
-        <h2>表</h2>
+        <h2 style="font-size: 1.2rem;">マトリクス表確認</h2>
         <div style="margin-bottom: 10px;">
-            <label>進行・調の選択: </label>
-            <select id="visualModeSelect" onchange="updateVisualTable()">
+            <label style="font-size: 0.9rem;">進行・調: </label><br>
+            <select id="visualModeSelect" onchange="updateVisualTable()" style="margin-top: 5px;">
                 <option value="dur">dur (長調 カデンツ)</option>
                 <option value="moll">moll (短調 カデンツ)</option>
                 <option value="kanon">カノン進行 (長調)</option>
             </select>
-            <select id="visualKeySelect" onchange="updateVisualTable()">
+            <select id="visualKeySelect" onchange="updateVisualTable()" style="margin-top: 5px;">
                 <!-- JSで動的に生成 -->
             </select>
         </div>
-        <h3 id="visualKeyTitle" style="margin: 5px 0 10px 0; color: #004085;">調 : --</h3>
-        <div style="overflow-x: auto;">
+        <h3 id="visualKeyTitle" style="margin: 5px 0 10px 0; color: #004085; font-size: 1.05rem;">調 : --</h3>
+        <div class="table-container">
             <table class="matrix-table" id="visualTable">
                 <thead>
                     <tr id="visualTableHeadRow">
-                        <!-- JSで動的生成 -->
+                        <!-- JSで動적生成 -->
                     </tr>
                 </thead>
                 <tbody id="visualTableBody"></tbody>
@@ -139,7 +152,6 @@
         function getCentsText(role, mode, chordName) {
             if (role === 'root') return '±0¢';
             if (role === 'third') {
-                // カノン進行内のマイナー和音（VIm, IIIm, VImなど）や短調の一部は短3度 (+16¢)
                 if (mode === 'kanon' && (chordName === 'VIm' || chordName === 'IIIm' || chordName === 'IVm')) {
                     return '+16¢';
                 }
@@ -310,8 +322,6 @@
             ]}
         };
 
-        // カノン進行データ (I - V - VIm - IIIm - IV - I - IV - V の8小節構成)
-        // ※各調ごとの構成音を定義
         const dataKanon = {
             "C": { name: "C-dur (カノン)", chords: [
                 { name: "I", voices: [{role:"root", note:"C3"}, {role:"third", note:"E3"}, {role:"fifth", note:"G3"}, {role:"empty", note:""}] },
@@ -472,9 +482,8 @@
 
             document.getElementById("visualKeyTitle").innerText = `調 : ${item.name}`;
 
-            // ヘッダー行の動的生成（カノン進行は8つのコードがあるため）
             const theadRow = document.getElementById("visualTableHeadRow");
-            theadRow.innerHTML = `<th style="width: 120px;">声部</th>`;
+            theadRow.innerHTML = `<th class="role-label">声部</th>`;
             item.chords.forEach((chord, index) => {
                 let th = document.createElement("th");
                 th.innerText = `${index + 1}. ${chord.name}`;
