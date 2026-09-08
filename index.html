@@ -19,10 +19,11 @@
         th { background: #e7f1ff; color: #004085; }
         tr:nth-child(even) { background: #fafafa; }
 
-        /* スライド風ビジュアル表のスタイル（色は問わずシンプルに音名を表示） */
+        /* スライド風ビジュアル表のスタイル */
         .slide-table { margin-top: 15px; }
         .slide-table th { background: #f8f9fa; color: #333; border: 1px solid #ccc; font-size: 1rem; }
-        .slide-table td { border: 1px solid #ccc; font-size: 1.1rem; height: 40px; color: #333; background: #fff; }
+        .slide-table td { border: 1px solid #ccc; font-size: 1.1rem; height: 40px; }
+        .highlight-row { background: #ffdfdf !important; } /* 画像のようなピンク色のハイライト */
 
         #tunerDisplay { font-size: 1.5rem; font-weight: bold; margin: 5px 0; color: #333; }
         #centsDisplay { font-size: 1.1rem; font-weight: bold; margin-top: 5px; }
@@ -193,6 +194,7 @@
             "G":  { name: "G-moll",  chords: [["Bb5","G5","D5","G3"], ["C6","G5","Eb5","C3"], ["D6","F#5","D5","D3"], ["Bb5","G5","D5","G3"]] }
         };
 
+        // 初期化処理
         function initVisualKeySelect() {
             const select = document.getElementById("visualKeySelect");
             select.innerHTML = "";
@@ -200,7 +202,7 @@
                 let opt = document.createElement("option");
                 opt.value = k;
                 opt.innerText = k;
-                if (k === "Bb") opt.selected = true;
+                if (k === "Bb") opt.selected = true; // デフォルトB-dur等を見やすく
                 select.appendChild(opt);
             });
         }
@@ -213,11 +215,21 @@
 
             document.getElementById("visualKeyTitle").innerText = `調 : ${item.name}`;
 
+            // item.chords は [ [Sop, Alto, Tenor, Bass], ... ] の4つ（I, IV, V, I）
+            // これを縦の行（声部ごと）に転置して表示する
             const tbody = document.getElementById("visualTableBody");
             tbody.innerHTML = "";
 
+            // 行0: ソプラノ (ハイライト)
+            // 行1: アルト
+            // 行2: テノール
+            // 行3: ベース (ハイライト)
             for (let v = 0; v < 4; v++) {
                 let tr = document.createElement("tr");
+                if (v === 0 || v === 3) {
+                    tr.className = "highlight-row";
+                }
+
                 for (let c = 0; c < 4; c++) {
                     let td = document.createElement("td");
                     let note = item.chords[c][v];
@@ -455,6 +467,7 @@
             return { name: noteName + octave, cents: cents };
         }
 
+        // 初期化実行
         initVisualKeySelect();
         updateVisualTable();
         updateTable();
