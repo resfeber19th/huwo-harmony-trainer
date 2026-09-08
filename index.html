@@ -392,8 +392,8 @@
 
                 // もし選ばれた声部が空白（empty）なら、他の有効な音を代わりに割り当てる
                 if (actualRole === 'empty') {
-                    let non-empty = chordObj.voices.filter(v => v.role !== 'empty');
-                    let fallback = non-empty[Math.floor(Math.random() * non-empty.length)];
+                    let nonEmptyVoices = chordObj.voices.filter(v => v.role !== 'empty');
+                    let fallback = nonEmptyVoices[Math.floor(Math.random() * nonEmptyVoices.length)];
                     actualRole = fallback.role;
                     actualNote = fallback.note;
                 }
