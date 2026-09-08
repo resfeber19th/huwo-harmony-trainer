@@ -378,7 +378,7 @@
             }
         }
 
-        function generateRandomCadenceNotes() {
+function generateRandomCadenceNotes() {
             const mode = document.getElementById("randModeSelect").value;
             const selectedKey = document.getElementById("randKeySelect").value;
             const display = document.getElementById("voiceDisplay");
@@ -392,21 +392,38 @@
 
             display.innerHTML = "";
 
+            // 出現比率 根音:3音:5音:7音 = 10:6:7:4 に合わせた重み付け配列
+            const roleWeights = {
+                'root': 10,
+                'third': 6,
+                'fifth': 7,
+                'seventh': 4
+            };
+
             item.chords.forEach(chordObj => {
                 let card = document.createElement("div");
 
-                let validVoices = chordObj.voices.map((v, idx) => ({ voice: v, index: idx }));
-                let chosen = validVoices[Math.floor(Math.random() * validVoices.length)];
-                
-                let actualRole = chosen.voice.role;
-                let actualNote = chosen.voice.note;
+                // 有効な（空ではない）声部を取得
+                let validVoices = chordObj.voices.filter(v => v.role !== 'empty');
 
-                if (actualRole === 'empty') {
-                    let nonEmptyVoices = chordObj.voices.filter(v => v.role !== 'empty');
-                    let fallback = nonEmptyVoices[Math.floor(Math.random() * nonEmptyVoices.length)];
-                    actualRole = fallback.role;
-                    actualNote = fallback.note;
+                // 重み付けに基づいてランダムに1つ選択する
+                let weightedList = [];
+                validVoices.forEach(v => {
+                    let weight = roleWeights[v.role] || 1;
+                    for (let i = 0; i < weight; i++) {
+                        weightedList.push(v);
+                    }
+                });
+
+                // 万が一weightedListが空の場合のフォールバック
+                if (weightedList.length === 0) {
+                    weightedList = validVoices;
                 }
+
+                let chosenVoice = weightedList[Math.floor(Math.random() * weightedList.length)];
+                
+                let actualRole = chosenVoice.role;
+                let actualNote = chosenVoice.note;
 
                 let germ = toGermanNote(actualNote);
                 let cents = getCentsText(actualRole, mode, chordObj.name);
@@ -420,7 +437,6 @@
                 display.appendChild(card);
             });
         }
-
         function onRandSettingChange() {
             generateRandomCadenceNotes();
         }
