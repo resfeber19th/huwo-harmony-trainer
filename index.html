@@ -26,9 +26,7 @@
         .voice-part { font-size: 0.8rem; color: #666; margin-bottom: 4px; }
         .voice-note { font-size: 1.3rem; font-weight: bold; }
 
-        .settings-box { background: #f8f9fa; border: 1px solid #ced4da; padding: 10px; border-radius: 6px; margin-bottom: 10px; font-size: 0.9rem; text-align: left; max-width: 650px; margin-left: auto; margin-right: auto; }
-        .checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; }
-        .checkbox-group label { font-size: 0.85rem; cursor: pointer; background: white; padding: 3px 6px; border: 1px solid #ddd; border-radius: 4px; }
+        .settings-box { background: #f8f9fa; border: 1px solid #ced4da; padding: 10px; border-radius: 6px; margin-bottom: 10px; font-size: 0.9rem; text-align: center; max-width: 650px; margin-left: auto; margin-right: auto; }
     </style>
 </head>
 <body>
@@ -40,21 +38,16 @@
         <h2>ランダム・ボイシング実践</h2>
         <p style="font-size: 0.85rem; color: #666;">実際の合奏でありがちな変則的な声部割り当てがランダムに出題されます。</p>
         
-        <!-- 出題対象の調を設定するエリア -->
+        <!-- 出題対象の調を設定するエリア（プルダウン） -->
         <div class="settings-box">
-            <strong>【ランダム出題の調設定】</strong>
-            <div style="margin: 5px 0;">
-                <label><input type="radio" name="randMode" value="dur" checked onclick="toggleRandMode()"> dur (長調) のみ</label>
-                <label style="margin-left: 10px;"><input type="radio" name="randMode" value="moll" onclick="toggleRandMode()"> moll (短調) のみ</label>
-                <label style="margin-left: 10px;"><input type="radio" name="randMode" value="both" onclick="toggleRandMode()"> 両方ミックス</label>
-            </div>
-            <div class="checkbox-group" id="randKeyCheckboxes">
+            <label><strong>【ランダム出題の調】</strong></label>
+            <select id="randModeSelect" style="margin-left: 5px;">
+                <option value="dur">dur (長調)</option>
+                <option value="moll">moll (短調)</option>
+            </select>
+            <select id="randKeySelect" style="margin-left: 5px;">
                 <!-- JSで動的生成 -->
-            </div>
-            <div style="margin-top: 5px; font-size: 0.8rem;">
-                <button type="button" onclick="setAllRandKeys(true)" style="padding: 2px 6px; font-size: 0.75rem;">全選択</button>
-                <button type="button" onclick="setAllRandKeys(false)" style="padding: 2px 6px; font-size: 0.75rem;">全解除</button>
-            </div>
+            </select>
         </div>
 
         <div class="random-box">
@@ -302,15 +295,27 @@
             ]}
         };
 
-        function initVisualKeySelect() {
-            const select = document.getElementById("visualKeySelect");
-            select.innerHTML = "";
+        function initKeySelects() {
+            // ランダム用調プルダウンの初期化
+            const randSelect = document.getElementById("randKeySelect");
+            randSelect.innerHTML = "";
             cycleKeys.forEach(k => {
                 let opt = document.createElement("option");
                 opt.value = k;
                 opt.innerText = cycleKeysGerman[k];
                 if (k === "Bb") opt.selected = true;
-                select.appendChild(opt);
+                randSelect.appendChild(opt);
+            });
+
+            // ビジュアル表用調プルダウンの初期化
+            const visSelect = document.getElementById("visualKeySelect");
+            visSelect.innerHTML = "";
+            cycleKeys.forEach(k => {
+                let opt = document.createElement("option");
+                opt.value = k;
+                opt.innerText = cycleKeysGerman[k];
+                if (k === "Bb") opt.selected = true;
+                visSelect.appendChild(opt);
             });
         }
 
@@ -349,32 +354,6 @@
             }
         }
 
-        // ランダム出題用の調チェックボックスを初期化
-        function initRandKeyCheckboxes() {
-            const container = document.getElementById("randKeyCheckboxes");
-            container.innerHTML = "";
-            cycleKeys.forEach(k => {
-                let lbl = document.createElement("label");
-                let chk = document.createElement("input");
-                chk.type = "checkbox";
-                chk.name = "randKey";
-                chk.value = k;
-                chk.checked = true; // デフォルト全選択
-                lbl.appendChild(chk);
-                lbl.appendChild(document.createTextNode(" " + cycleKeysGerman[k]));
-                container.appendChild(lbl);
-            });
-        }
-
-        function toggleRandMode() {
-            // モード切替時に必要なら挙動を調整（今回はそのままチェックボックス維持）
-        }
-
-        function setAllRandKeys(checked) {
-            const checkboxes = document.querySelectorAll('input[name="randKey"]');
-            checkboxes.forEach(chk => chk.checked = checked);
-        }
-
         const randomVoicingTemplates = [
             { roles: ["root", "third", "fifth", "seventh"] },
             { roles: ["third", "fifth", "fifth", "seventh"] },
@@ -384,25 +363,12 @@
         ];
 
         function generateRandomVoice() {
-            // 選択されている調・モードの収集
-            const modeSetting = document.querySelector('input[name="randMode"]:checked').value;
-            const checkedKeys = Array.from(document.querySelectorAll('input[name="randKey"]:checked')).map(chk => chk.value);
+            // ランダム設定のプルダウンから選択値を取得
+            const mode = document.getElementById("randModeSelect").value;
+            const selectedKey = document.getElementById("randKeySelect").value;
 
-            if (checkedKeys.length === 0) {
-                document.getElementById("randomCondition").innerText = "【エラー】出題する調が選択されていません。上の設定で調を選んでください。";
-                document.getElementById("voiceDisplay").innerHTML = "";
-                return;
-            }
-
-            // モードの決定 (dur, moll, または両方ミックス)
-            let mode = modeSetting;
-            if (modeSetting === "both") {
-                mode = Math.random() < 0.5 ? "dur" : "moll";
-            }
-
-            const randomKey = checkedKeys[Math.floor(Math.random() * checkedKeys.length)];
             const dataset = (mode === "dur") ? dataDur : dataMoll;
-            const item = dataset[randomKey];
+            const item = dataset[selectedKey];
 
             const chordIndices = [0, 1, 2, 3]; // I, IV, V7, I
             const chordIndex = chordIndices[Math.floor(Math.random() * chordIndices.length)];
@@ -422,10 +388,10 @@
             document.getElementById("randomCondition").innerText = 
                 `【出題】 ${item.name} ＞ ${chordObj.name}和音`;
 
-            // ★ ここで下のビジュアル表の調・モードも自動連動して書き換える ★
+            // 下のビジュアル表の調・モードも自動連動
             document.getElementById("visualModeSelect").value = mode;
-            document.getElementById("visualKeySelect").value = randomKey;
-            updateVisualTable(); // 表を更新
+            document.getElementById("visualKeySelect").value = selectedKey;
+            updateVisualTable();
 
             const display = document.getElementById("voiceDisplay");
             display.innerHTML = "";
@@ -448,8 +414,7 @@
             });
         }
 
-        initVisualKeySelect();
-        initRandKeyCheckboxes();
+        initKeySelects();
         updateVisualTable();
         generateRandomVoice();
     </script>
