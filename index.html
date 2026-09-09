@@ -57,7 +57,7 @@
 
     <div class="section">
         <div class="settings-box">
-            <label><strong>【進行・調選択】</strong></label><br>
+            <label><strong>【メニュー・調選択】</strong></label><br>
             <select id="randModeSelect" onchange="onRandSettingChange()" style="margin-top: 5px;">
                 <option value="dur">dur (長調 カデンツ)</option>
                 <option value="moll">moll (短調 カデンツ)</option>
@@ -78,9 +78,9 @@
     </div>
 
     <div class="section">
-        <h2 style="font-size: 1.2rem;">一覧</h2>
+        <h2 style="font-size: 1.2rem;">構成音一覧</h2>
         <div style="margin-bottom: 10px;">
-            <label style="font-size: 0.9rem;">進行・調: </label><br>
+            <label style="font-size: 0.9rem;">メニュー・調: </label><br>
             <select id="visualModeSelect" onchange="updateVisualTable()" style="margin-top: 5px;">
                 <option value="dur">dur (長調 カデンツ)</option>
                 <option value="moll">moll (短調 カデンツ)</option>
@@ -182,7 +182,7 @@
             "Ab": { name: "As-dur", scale: ["As", "B", "C", "Des", "Es", "F", "G"] },
             "Db": { name: "Des-dur", scale: ["Des", "Es", "F", "Ges", "As", "B", "C"] },
             "Gb": { name: "Ges-dur", scale: ["Ges", "As", "B", "Ces", "Des", "Es", "F"] },
-            "B":  { name: "H-dur",  scale: ["H", "Cis", "Dis", "E", "Fis", "Gis", "Ais"] },
+            "Cb":  { name: "H-dur",  scale: ["Ces", "Des", "Eb", "Fes", "Ges", "As", "B"] },
             "E":  { name: "E-dur",  scale: ["E", "Fis", "Gis", "A", "H", "Cis", "Dis"] },
             "A":  { name: "A-dur",  scale: ["A", "H", "Cis", "D", "E", "Fis", "Gis"] },
             "D":  { name: "D-dur",  scale: ["D", "E", "Fis", "G", "A", "H", "Cis"] },
@@ -232,12 +232,11 @@
                 { name: "V7", voices: [{role:"root", note:"Db3"}, {role:"third", note:"F3"}, {role:"fifth", note:"Ab3"}, {role:"seventh", note:"Cb4"}] },
                 { name: "I", voices: [{role:"root", note:"Gb3"}, {role:"third", note:"Bb3"}, {role:"fifth", note:"Db4"}, {role:"empty", note:""}] }
             ]},
-            "B": { name: "H-dur", chords: [
-                { name: "I", voices: [{role:"root", note:"B2"}, {role:"third", note:"D#3"}, {role:"fifth", note:"F#3"}, {role:"empty", note:""}] },
-                { name: "IV", voices: [{role:"root", note:"E3"}, {role:"third", note:"G#3"}, {role:"fifth", note:"B3"}, {role:"empty", note:""}] },
-                { name: "V7", voices: [{role:"root", note:"F#3"}, {role:"third", note:"A#3"}, {role:"fifth", note:"C#4"}, {role:"seventh", note:"E4"}] },
-                { name: "I", voices: [{role:"root", note:"B2"}, {role:"third", note:"D#3"}, {role:"fifth", note:"F#3"}, {role:"empty", note:""}] }
-            ]},
+           "Cb": { name: "Ces-dur", chords: [
+                { name: "I", voices: [{role:"root", note:"Cb3"}, {role:"third", note:"Eb3"}, {role:"fifth", note:"Gb3"}, {role:"empty", note:""}] },
+                { name: "IV", voices: [{role:"root", note:"Fb3"}, {role:"third", note:"Ab3"}, {role:"fifth", note:"Cb4"}, {role:"empty", note:""}] },
+                { name: "V7", voices: [{role:"root", note:"Gb3"}, {role:"third", note:"Bb3"}, {role:"fifth", note:"Db4"}, {role:"seventh", note:"Fb4"}] },
+                { name: "I", voices: [{role:"root", note:"Cb3"}, {role:"third", note:"Eb3"}, {role:"fifth", note:"Gb3"}, {role:"empty", note:""}] }
             "E": { name: "E-dur", chords: [
                 { name: "I", voices: [{role:"root", note:"E3"}, {role:"third", note:"G#3"}, {role:"fifth", note:"B3"}, {role:"empty", note:""}] },
                 { name: "IV", voices: [{role:"root", note:"A3"}, {role:"third", note:"C#4"}, {role:"fifth", note:"E4"}, {role:"empty", note:""}] },
@@ -307,11 +306,11 @@
                 { name: "V7", voices: [{role:"root", note:"Db3"}, {role:"third", note:"F3"}, {role:"fifth", note:"Ab3"}, {role:"seventh", note:"Cb4"}] },
                 { name: "I", voices: [{role:"root", note:"Gb3"}, {role:"third", note:"Bbb3"}, {role:"fifth", note:"Db4"}, {role:"empty", note:""}] }
             ]},
-            "B": { name: "h-moll", chords: [
-                { name: "I", voices: [{role:"root", note:"B2"}, {role:"third", note:"D3"}, {role:"fifth", note:"F#3"}, {role:"empty", note:""}] },
-                { name: "IV", voices: [{role:"root", note:"E3"}, {role:"third", note:"G3"}, {role:"fifth", note:"B3"}, {role:"empty", note:""}] },
-                { name: "V7", voices: [{role:"root", note:"F#3"}, {role:"third", note:"A#3"}, {role:"fifth", note:"C#4"}, {role:"seventh", note:"E4"}] },
-                { name: "I", voices: [{role:"root", note:"B2"}, {role:"third", note:"D3"}, {role:"fifth", note:"F#3"}, {role:"empty", note:""}] }
+            "Cb": { name: "ces-moll", chords: [
+                { name: "I", voices: [{role:"root", note:"Cb3"}, {role:"third", note:"Ebb3"}, {role:"fifth", note:"Gb3"}, {role:"empty", note:""}] },
+                { name: "IV", voices: [{role:"root", note:"Fb3"}, {role:"third", note:"Bbb3"}, {role:"fifth", note:"Cb4"}, {role:"empty", note:""}] },
+                { name: "V7", voices: [{role:"root", note:"Gb3"}, {role:"third", note:"Bb3"}, {role:"fifth", note:"Db4"}, {role:"seventh", note:"Fb4"}] },
+                { name: "I", voices: [{role:"root", note:"Cb3"}, {role:"third", note:"Ebb3"}, {role:"fifth", note:"Gb3"}, {role:"empty", note:""}] }
             ]},
             "E": { name: "e-moll", chords: [
                 { name: "I", voices: [{role:"root", note:"E3"}, {role:"third", note:"G3"}, {role:"fifth", note:"B3"}, {role:"empty", note:""}] },
@@ -620,7 +619,7 @@
             display.innerHTML = "";
 
             const roleWeights = {
-                'root': 9,
+                'root': 8,
                 'third': 6,
                 'fifth': 7,
                 'seventh': 3
