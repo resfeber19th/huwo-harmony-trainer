@@ -72,7 +72,7 @@
             <div id="randomCondition" style="font-weight: bold; color: #1c7ed6; font-size: 1.1rem; margin-bottom: 5px;">調名</div>
             <div class="voice-display" id="voiceDisplay">
             </div>
-            <div class="tip-text">カードをタップすると音名を隠したり表示したりできます</div>
+            <div class="tip-text"></div>
             <button id="newPatternBtn" class="main-btn" onclick="generateRandomCadenceNotes();" style="font-size: 1rem; padding: 10px 20px; width: 100%; max-width: 300px; margin-top: 10px;">新規パターン作成</button>
         </div>
     </div>
@@ -587,7 +587,7 @@
 
         function generateParallelPattern(selectedKey) {
             const scaleData = scalesGerman[selectedKey] || scalesGerman["C"];
-            document.getElementById("randomCondition").innerText = `[${scaleData.name}スケール (1・3・5度)`;
+            document.getElementById("randomCondition").innerText = `[${scaleData.name}]スケール (1・3・5度)`;
             document.getElementById("voiceDisplay").innerHTML = ""; 
 
             document.getElementById("visualModeSelect").value = "parallel";
